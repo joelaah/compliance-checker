@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3.0">
 </head>
 <body>
   <div class="app-layout">
@@ -103,13 +103,13 @@
 
         <!-- Scanner Input Mode Tabs -->
         <div class="scanner-mode-tabs">
-          <button class="scanner-mode-btn active" id="btnModeUpload" data-mode="upload">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span>📁 Upload Codebase / Files (.js, .py, .env, .sql, .kt, .java, mobile)</span>
+          <button class="scanner-mode-btn active" id="btnModeUpload" data-mode="upload" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; max-width: 18px; max-height: 18px; flex-shrink: 0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Upload Codebase & Files (.js, .py, .env, .sql, mobile)</span>
           </button>
-          <button class="scanner-mode-btn" id="btnModeUrl" data-mode="url">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span>🌐 Web Endpoint / Domain URL Scan</span>
+          <button class="scanner-mode-btn" id="btnModeUrl" data-mode="url" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; max-width: 18px; max-height: 18px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span>Web Endpoint Scan</span>
           </button>
         </div>
 
@@ -118,7 +118,7 @@
           <div class="hero-dropzone" id="heroDropzone">
             <input type="file" id="heroFileInput" class="file-input-hidden" multiple accept=".js,.ts,.py,.sql,.php,.env,.json,.txt,.java,.go,.kt,.dart,.xml,.yml,.yaml">
             <div class="hero-dropzone-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; max-width: 24px; max-height: 24px; flex-shrink: 0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
             <div class="hero-dropzone-copy">
               <strong>Drag & Drop your codebase files or <code>.env</code> here</strong>
