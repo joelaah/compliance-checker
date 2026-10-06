@@ -101,29 +101,76 @@
           </div>
         </div>
 
-        <!-- App Details & URL Quick Check bar -->
-        <div class="quick-scanner-bar">
-          <div class="input-group flex-2">
-            <label for="appNameInput">Application / Service Name</label>
-            <input type="text" id="appNameInput" placeholder="e.g. Acme Cloud Platform" value="My Web Application">
+        <!-- Scanner Input Mode Tabs -->
+        <div class="scanner-mode-tabs">
+          <button class="scanner-mode-btn active" id="btnModeUpload" data-mode="upload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>📁 Upload Codebase / Files (.js, .py, .env, .sql, .kt, .java, mobile)</span>
+          </button>
+          <button class="scanner-mode-btn" id="btnModeUrl" data-mode="url">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span>🌐 Web Endpoint / Domain URL Scan</span>
+          </button>
+        </div>
+
+        <!-- Mode 1: Codebase & File Upload (Active) -->
+        <div class="scanner-panel-mode" id="panelModeUpload">
+          <div class="hero-dropzone" id="heroDropzone">
+            <input type="file" id="heroFileInput" class="file-input-hidden" multiple accept=".js,.ts,.py,.sql,.php,.env,.json,.txt,.java,.go,.kt,.dart,.xml,.yml,.yaml">
+            <div class="hero-dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="hero-dropzone-copy">
+              <strong>Drag & Drop your codebase files or <code>.env</code> here</strong>
+              <span>Supports single files, multiple files, or entire repositories (JavaScript, Python, SQL, Java, Kotlin, PHP, Dart, .env)</span>
+              <div class="hero-dropzone-pills">
+                <span class="badge-pill">🔒 100% In-Memory Browser Scan</span>
+                <span class="badge-pill">⚡ Zero Server Upload</span>
+                <span class="badge-pill">📂 Unlimited Lines of Code</span>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnBrowseFiles" type="button">Browse Files</button>
           </div>
-          <div class="input-group flex-2">
-            <label for="appUrlInput">App Endpoint / Domain (Optional)</label>
-            <input type="text" id="appUrlInput" placeholder="https://app.example.com">
+
+          <!-- Upload Status & Quick Presets -->
+          <div class="upload-quick-bar">
+            <div class="upload-active-status" id="uploadActiveStatus">
+              <span class="status-dot"></span>
+              <span id="uploadStatusText">Ready to scan codebase. Or test with sample snippets:</span>
+            </div>
+            <div class="upload-preset-shortcuts">
+              <button class="preset-pill-btn" id="heroBtnSampleSqli">💉 Test SQL Injection Flaw</button>
+              <button class="preset-pill-btn" id="heroBtnSampleSecrets">🔑 Test Leaked Secrets</button>
+              <button class="preset-pill-btn" id="heroBtnSampleSecure">🛡️ Test Secure Code</button>
+            </div>
           </div>
-          <div class="input-group flex-1">
-            <label for="envSelect">Target Environment</label>
-            <select id="envSelect">
-              <option value="prod">Production (Live)</option>
-              <option value="staging">Staging / Pre-prod</option>
-              <option value="mvp">Pre-launch MVP</option>
-            </select>
-          </div>
-          <div class="input-action">
-            <button id="btnFastScan" class="btn btn-primary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              <span>Quick Audit</span>
-            </button>
+        </div>
+
+        <!-- Mode 2: App Details & URL Quick Check bar -->
+        <div class="scanner-panel-mode" id="panelModeUrl" style="display: none;">
+          <div class="quick-scanner-bar">
+            <div class="input-group flex-2">
+              <label for="appNameInput">Application / Service Name</label>
+              <input type="text" id="appNameInput" placeholder="e.g. Acme Cloud Platform" value="My Web Application">
+            </div>
+            <div class="input-group flex-2">
+              <label for="appUrlInput">App Endpoint / Domain (Optional)</label>
+              <input type="text" id="appUrlInput" placeholder="https://app.example.com">
+            </div>
+            <div class="input-group flex-1">
+              <label for="envSelect">Target Environment</label>
+              <select id="envSelect">
+                <option value="prod">Production (Live)</option>
+                <option value="staging">Staging / Pre-prod</option>
+                <option value="mvp">Pre-launch MVP</option>
+              </select>
+            </div>
+            <div class="input-action">
+              <button id="btnFastScan" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <span>Quick Audit</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>

@@ -689,9 +689,90 @@ class ComplianceApp {
     this.codeCharCount = document.getElementById('codeCharCount');
     this.scanTimestamp = document.getElementById('scanTimestamp');
     this.latestCodeFindings = [];
+
+    // Hero Codebase Upload Elements
+    this.btnModeUpload = document.getElementById('btnModeUpload');
+    this.btnModeUrl = document.getElementById('btnModeUrl');
+    this.panelModeUpload = document.getElementById('panelModeUpload');
+    this.panelModeUrl = document.getElementById('panelModeUrl');
+    this.heroDropzone = document.getElementById('heroDropzone');
+    this.heroFileInput = document.getElementById('heroFileInput');
+    this.btnBrowseFiles = document.getElementById('btnBrowseFiles');
+    this.uploadStatusText = document.getElementById('uploadStatusText');
   }
 
   bindEvents() {
+    // Hero Mode Toggles
+    if (this.btnModeUpload && this.btnModeUrl) {
+      this.btnModeUpload.addEventListener('click', () => {
+        this.btnModeUpload.classList.add('active');
+        this.btnModeUrl.classList.remove('active');
+        if (this.panelModeUpload) this.panelModeUpload.style.display = 'block';
+        if (this.panelModeUrl) this.panelModeUrl.style.display = 'none';
+      });
+
+      this.btnModeUrl.addEventListener('click', () => {
+        this.btnModeUrl.classList.add('active');
+        this.btnModeUpload.classList.remove('active');
+        if (this.panelModeUrl) this.panelModeUrl.style.display = 'block';
+        if (this.panelModeUpload) this.panelModeUpload.style.display = 'none';
+      });
+    }
+
+    // Hero File Upload & Dropzone
+    if (this.heroFileInput) {
+      this.btnBrowseFiles?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.heroFileInput.click();
+      });
+
+      this.heroDropzone?.addEventListener('click', () => {
+        this.heroFileInput.click();
+      });
+
+      this.heroDropzone?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        this.heroDropzone.classList.add('dragover');
+      });
+
+      this.heroDropzone?.addEventListener('dragleave', () => {
+        this.heroDropzone.classList.remove('dragover');
+      });
+
+      this.heroDropzone?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        this.heroDropzone.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          this.handleMultiFileUpload(e.dataTransfer.files);
+        }
+      });
+
+      this.heroFileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          this.handleMultiFileUpload(e.target.files);
+        }
+      });
+    }
+
+    // Hero Sample Shortcuts
+    document.getElementById('heroBtnSampleSqli')?.addEventListener('click', () => {
+      this.loadCodePreset('sqli');
+      const codeTabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+      if (codeTabBtn) codeTabBtn.click();
+    });
+
+    document.getElementById('heroBtnSampleSecrets')?.addEventListener('click', () => {
+      this.loadCodePreset('secrets');
+      const codeTabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+      if (codeTabBtn) codeTabBtn.click();
+    });
+
+    document.getElementById('heroBtnSampleSecure')?.addEventListener('click', () => {
+      this.loadCodePreset('secure');
+      const codeTabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+      if (codeTabBtn) codeTabBtn.click();
+    });
+
     // Nav tabs
     document.querySelectorAll('.nav-tab').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -932,6 +1013,41 @@ class ComplianceApp {
       }
     };
     reader.readAsText(file);
+  }
+
+  handleMultiFileUpload(fileList) {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
+    let totalLines = 0;
+    let combinedContent = '';
+    let filesRead = 0;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        combinedContent += `\n// ==========================================\n// File: ${file.name}\n// ==========================================\n` + text + `\n`;
+        totalLines += text.split('\n').length;
+        filesRead++;
+
+        if (filesRead === files.length) {
+          if (this.codeEditorInput) {
+            this.codeEditorInput.value = combinedContent;
+            this.updateCodeCounters();
+          }
+          if (this.uploadStatusText) {
+            this.uploadStatusText.innerHTML = `✅ Analyzed <strong>${files.length} file(s)</strong> (${totalLines.toLocaleString()} lines of code).`;
+          }
+          this.runCodeSecurityScan();
+          this.showToast(`Analyzed ${files.length} file(s) with ${totalLines.toLocaleString()} lines of code!`);
+
+          // Switch to Code & Secret Scanner tab to see findings
+          const codeTabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+          if (codeTabBtn) codeTabBtn.click();
+        }
+      };
+      reader.readAsText(file);
+    });
   }
 
   runCodeSecurityScan() {
