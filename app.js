@@ -437,7 +437,7 @@ const AWS_KEY = process.env.AWS_ACCESS_KEY_ID;`
     cwe: 'CWE-798: Hardcoded Credentials',
     owasp: 'OWASP Top 10 A07:2021 - Identification & Authentication Failures',
     complianceControl: 'DATA-02',
-    test: (line) => /(sk-[a-zA-Z0-9]{32,}|sk-proj-[a-zA-Z0-9_\-]{30,})/.test(line),
+    test: (line) => /(sk-[a-zA-Z0-9_\-]{20,})/.test(line),
     exploit: 'Attackers drain API credit quotas, fine-tune models on your billing card, or access sensitive AI prompt telemetry.',
     badCode: `const client = new OpenAI({ apiKey: "sk-proj-xyz..." });`,
     goodCode: `const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });`
@@ -569,7 +569,7 @@ app.post('/api/auth/login', async (req, res) => {
   secrets: `// ⚠️ VULNERABLE: Hardcoded production secrets in codebase
 const AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE";
 const AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
-const OPENAI_API_KEY = "sk-proj-9A8b7C6d5E4f3G2h1J0k9L8m7N6p5Q4r3S2t1U0v";
+const OPENAI_API_KEY = "sk-TEST-DEMO-MOCK-API-KEY-DO-NOT-USE-123456789";
 const DATABASE_URL = "postgres://root:SuperSecretPassword2024!@production-cluster.internal:5432/core_db";
 const JWT_SECRET = "jwt_super_secret_signing_key_9918237";`,
 
