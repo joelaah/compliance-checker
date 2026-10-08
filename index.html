@@ -117,19 +117,24 @@
         <div class="scanner-panel-mode" id="panelModeUpload">
           <div class="hero-dropzone" id="heroDropzone">
             <input type="file" id="heroFileInput" class="file-input-hidden" multiple accept=".js,.ts,.py,.sql,.php,.env,.json,.txt,.java,.go,.kt,.dart,.xml,.yml,.yaml">
+            <input type="file" id="heroFolderInput" class="file-input-hidden" webkitdirectory directory multiple>
             <div class="hero-dropzone-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; max-width: 24px; max-height: 24px; flex-shrink: 0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
             <div class="hero-dropzone-copy">
-              <strong>Drag & Drop your codebase files or <code>.env</code> here</strong>
-              <span>Supports single files, multiple files, or entire repositories (JavaScript, Python, SQL, Java, Kotlin, PHP, Dart, .env)</span>
+              <strong>Drag & Drop your codebase files, app bundle, or <code>.env</code> here</strong>
+              <span>Supports single files, multiple files, Flutter app bundles, or entire repositories (Dart, JavaScript, Python, SQL, Java, Kotlin, PHP, .env)</span>
               <div class="hero-dropzone-pills">
                 <span class="badge-pill">🔒 100% In-Memory Browser Scan</span>
                 <span class="badge-pill">⚡ Zero Server Upload</span>
                 <span class="badge-pill">📂 Unlimited Lines of Code</span>
+                <span class="badge-pill">🌍 Worldwide Country Audit</span>
               </div>
             </div>
-            <button class="btn btn-primary btn-sm" id="btnBrowseFiles" type="button">Browse Files</button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-sm" id="btnBrowseFiles" type="button">Browse Files</button>
+              <button class="btn btn-secondary btn-sm" id="btnBrowseFolder" type="button">📁 Upload Folder / Bundle</button>
+            </div>
           </div>
 
           <!-- Upload Status & Quick Presets -->
@@ -139,9 +144,14 @@
               <span id="uploadStatusText">Ready to scan codebase. Or test with sample snippets:</span>
             </div>
             <div class="upload-preset-shortcuts">
-              <button class="preset-pill-btn" id="heroBtnSampleSqli">💉 Test SQL Injection Flaw</button>
-              <button class="preset-pill-btn" id="heroBtnSampleSecrets">🔑 Test Leaked Secrets</button>
-              <button class="preset-pill-btn" id="heroBtnSampleSecure">🛡️ Test Secure Code</button>
+              <button class="preset-pill-btn" id="heroBtnSampleSqli">💉 SQL Injection</button>
+              <button class="preset-pill-btn" id="heroBtnSampleSecrets">🔑 Leaked Secrets</button>
+              <button class="preset-pill-btn" id="heroBtnSampleCoppa">👶 COPPA Age Gate</button>
+              <button class="preset-pill-btn" id="heroBtnSampleFonts">🔤 Google Fonts</button>
+              <button class="preset-pill-btn" id="heroBtnSampleReplay">📹 Session Replay</button>
+              <button class="preset-pill-btn" id="heroBtnSampleEmail">✉️ Email Unsubscribe</button>
+              <button class="preset-pill-btn" id="heroBtnSampleFlutter">📱 Flutter App Bundle</button>
+              <button class="preset-pill-btn" id="heroBtnSampleSecure">🛡️ Secure Code</button>
             </div>
           </div>
         </div>
@@ -186,7 +196,7 @@
         </div>
       </section>
 
-      <!-- View Navigation Tabs: Checklist vs Gap Analysis vs Remediation Plan -->
+      <!-- View Navigation Tabs: Checklist vs Codescan vs Launch Readiness vs Gaps vs Remediation Plan -->
       <div class="tab-navigation">
         <button class="nav-tab active" data-tab="checklist">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -195,6 +205,10 @@
         <button class="nav-tab" data-tab="codescan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
           Code & Secret Scanner (<span id="tabCodeVulnCount" class="badge-accent">0</span>)
+        </button>
+        <button class="nav-tab" data-tab="launch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Global Launch Readiness (<span id="tabLaunchBlockedCount" class="badge-accent ready">Safe</span>)
         </button>
         <button class="nav-tab" data-tab="gaps">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -276,9 +290,14 @@
             <div class="editor-toolbar">
               <span class="toolbar-label">Load Vulnerability Presets:</span>
               <div class="preset-pill-group">
-                <button class="pill-btn" id="btnPresetSqli" title="Test SQL injection flaw">💉 SQL Injection Flaw</button>
-                <button class="pill-btn" id="btnPresetSecrets" title="Test hardcoded API key leaks">🔑 Hardcoded Keys & Secrets</button>
-                <button class="pill-btn" id="btnPresetEval" title="Test dangerous eval/RCE pattern">⚡ Dangerous eval / RCE</button>
+                <button class="pill-btn" id="btnPresetSqli" title="Test SQL injection flaw">💉 SQL Injection</button>
+                <button class="pill-btn" id="btnPresetSecrets" title="Test hardcoded API key leaks">🔑 Leaked Secrets</button>
+                <button class="pill-btn" id="btnPresetEval" title="Test dangerous eval/RCE pattern">⚡ eval / RCE</button>
+                <button class="pill-btn" id="btnPresetCoppa" title="Test COPPA minor age gate flaw">👶 COPPA Age Gate</button>
+                <button class="pill-btn" id="btnPresetFonts" title="Test Google Fonts runtime fetching">🔤 Google Fonts Dynamic</button>
+                <button class="pill-btn" id="btnPresetReplay" title="Test session replay SDK leak">📹 Session Replay Leak</button>
+                <button class="pill-btn" id="btnPresetEmail" title="Test commercial email missing unsubscribe">✉️ Email Missing Unsub</button>
+                <button class="pill-btn" id="btnPresetFlutter" title="Test Flutter app bundle">📱 Flutter App Bundle</button>
                 <button class="pill-btn" id="btnPresetSecure" title="Test secure parameterized code">🛡️ Clean Secure Code</button>
               </div>
             </div>
@@ -355,6 +374,48 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- TAB: Global Country Launch Readiness & Regulatory Availability -->
+      <section id="view-launch" class="tab-view">
+        <!-- Hero Verdict Banner -->
+        <div class="launch-hero-card glass-panel" id="launchHeroBanner">
+          <!-- Populated dynamically by JS -->
+        </div>
+
+        <!-- Filter and Search Toolbar -->
+        <div class="checklist-toolbar glass-panel" style="margin-top: 22px;">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="launchSearchInput" placeholder="Search country, jurisdiction, or regulation (e.g. Germany, India, USA, California, Canada, Brazil, UK)...">
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Launch Status:</span>
+            <select id="launchStatusFilter" class="custom-select">
+              <option value="all">All Jurisdictions (Worldwide)</option>
+              <option value="blocked">⛔ Blocked / Restricted Only (Fix Needed)</option>
+              <option value="ready">✅ Launch Allowed (Safe to Launch)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Display Mode:</span>
+            <div class="btn-toggle-group" style="width: auto;">
+              <button class="toggle-opt selected-pass" id="btnLaunchModeCountries" type="button">🌐 195 Sovereign Countries</button>
+              <button class="toggle-opt" id="btnLaunchModeJurisdictions" type="button">⚖️ Regional Jurisdictions</button>
+            </div>
+          </div>
+
+          <div class="quick-batch-btns">
+            <button id="btnRefreshLaunch" class="btn btn-sm btn-ghost" title="Re-evaluate country compliance">🔄 Re-evaluate</button>
+          </div>
+        </div>
+
+        <!-- Jurisdictions Grid Container -->
+        <div class="jurisdictions-grid" id="jurisdictionsContainer">
+          <!-- Populated dynamically by JS -->
         </div>
       </section>
 

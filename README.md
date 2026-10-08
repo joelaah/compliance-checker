@@ -76,8 +76,28 @@ Detects dangerous coding patterns before deployment or third-party audits:
 | **Remote Code Execution (RCE)** | Attackers supply command separators (`;`, `|`) to execute arbitrary host commands or reverse shells. | **CWE-95 / CWE-78** | Flagging `eval()`, `Function()`, and `child_process.exec()` with sanitization fixes. |
 | **Cross-Site Scripting (XSS)** | Injection of malicious scripts that steal authorization cookies and session tokens. | **CWE-79** / OWASP A03:2021 | Deprecation of `innerHTML` / `dangerouslySetInnerHTML` in favor of sanitized text content. |
 | **Broken Cryptography** | Fast rainbow table cracking of password databases. | **CWE-328** / OWASP A02:2021 | Enforcing salted hashes (`bcrypt`, `Argon2id`) over deprecated MD5/SHA-1. |
+| **COPPA & Minor Age Gating** | Collecting PII from minors under 13/16/18 without neutral age verification or parental consent triggers massive civil penalties. | **CWE-359** / FTC COPPA 16 CFR § 312 | Neutral Date of Birth (DOB) gating on auth/signup flows, parental consent capture, and blocking auto-profiling of children. |
+| **Google Fonts Runtime Leaks** | Dynamic fetching of Google Fonts transmits European users' IP addresses to foreign servers without consent (Landgericht München ruling). | **CWE-359** / GDPR Art 6(1)(f) | Disabling Flutter runtime fetching (`allowRuntimeFetching = false`), local TTF bundling in `assets/`, or web `@font-face` self-hosting. |
+| **Session Replay Wiretap Risk** | Session recording tools (FullStory, LogRocket, Smartlook, Clarity) intercept keystrokes and user sessions without prior opt-in consent. | **CWE-359** / PA & FL Wiretap Acts | Requiring explicit cookie banner consent prior to initialization and enforcing full DOM/input masking (`maskAllInputs: true`). |
+| **Commercial Email Non-Compliance** | Dispatching promotional emails without automated one-click unsubscribe links and physical postal addresses violates anti-spam laws. | **CWE-359** / CAN-SPAM, CASL, Spam Act | Adding `{{unsubscribe_url}}` / `List-Unsubscribe` headers and valid physical corporate postal address to all email dispatch routines. |
 
-### 2. Multi-Framework Regulatory Coverage
+### 2. Global Jurisdictional Readiness Engine ("Can It Be Launched Here?")
+Analyzes code findings and compliance gaps against sovereign privacy frameworks to determine whether an application can legally launch:
+
+* **Jurisdiction Database**: Evaluates **12 global legal authorities** and **46+ sovereign countries/territories** (EU/EEA 30 nations, US Federal, US California, US PA/FL Wiretap, India, UK, Canada, Australia, Brazil, China, Japan, Saudi Arabia).
+* **Automated Verdict Classification**:
+  * 🟢 **Allowed / Ready**: All statutory requirements met; zero legal blockers detected.
+  * 🟡 **Restricted**: Permitted with operational warnings (e.g. cookie consent or data retention gaps).
+  * 🔴 **Blocked**: Active legal blockers detected (e.g. illegal IP leaks, unconsented wiretapping, missing child age gates).
+* **Statutory Citations & Remediation**: Every blocked country card displays the exact governing statute, potential statutory fines (e.g., CASL $10M CAD, GDPR €20M / 4%, DPDP ₹250 Cr, FTC $51,744/violation), detailed legal reasoning, and line-level code fixes.
+* **Country Search & Filter**: Search by any country name (e.g., *Germany*, *India*, *Canada*, *Japan*) or filter by status (*All*, *Ready*, *Restricted*, *Blocked*).
+
+### 3. Flutter & Project Repository Bundle Scanner
+* **Folder & Multi-File Upload**: Drag & drop or browse full project directories (`webkitdirectory`) to scan entire mobile or web repositories at once.
+* **Multi-Language Support**: Scans Dart (`.dart`), JavaScript (`.js`), TypeScript (`.ts`), HTML (`.html`), Python (`.py`), and configuration files.
+* **1-Click Presets**: Pre-loaded test cases for COPPA, Google Fonts, Session Replay, Commercial Email, and complete multi-file Flutter app bundles.
+
+### 4. Multi-Framework Regulatory Coverage
 Cross-maps controls across the world's most critical certifications:
 * **SOC 2 Type II**: Trust Services Criteria (CC6 Access, CC7 Monitoring, CC8 Change Management, A1 Availability).
 * **ISO/IEC 27001:2022**: Modern ISMS Annex A Controls (A.5 Organizational, A.8 Technological, A.8.24 Cryptography).
@@ -86,13 +106,13 @@ Cross-maps controls across the world's most critical certifications:
 * **PCI-DSS v4.0**: Cardholder data encryption at rest (AES-256), TLS 1.2+ in transit, MFA, and vulnerability scanning.
 * **NIST CSF 2.0**: Govern, Identify, Protect, Detect, Respond, and Recover tiers.
 
-### 3. Pre-Configured Industry Profiles (1-Click Demo)
+### 5. Pre-Configured Industry Profiles (1-Click Demo)
 * ☁️ **B2B SaaS Enterprise Platform**: Focuses on SOC 2 Type II, multi-tenant RBAC, and centralized logging.
 * 🏥 **Telehealth & Patient Portal**: Focuses on HIPAA Technical Safeguards and sub-processor BAAs.
 * 💳 **FinTech & Payments API**: Focuses on PCI-DSS v4, cardholder encryption, and vulnerability scanning.
 * 🌍 **Global Consumer Web App**: Focuses on GDPR data subject rights (erasure, cookie opt-in, breach disclosure).
 
-### 4. Audit-Ready Policy Template Generator
+### 6. Audit-Ready Policy Template Generator
 Generates customized, markdown-formatted compliance policies with 1-click clipboard copy:
 * 🚨 **Incident Response Plan & 72-Hour Breach Protocol** (SOC 2 CC7.3 & GDPR Art 33)
 * 🔑 **Access Control & Multi-Factor Authentication Policy** (SOC 2 CC6.1 & ISO 27001 A.8.5)
