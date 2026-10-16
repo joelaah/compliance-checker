@@ -38,7 +38,7 @@ def compute_deterministic_embedding(text: str, dim: int = 768) -> List[float]:
     if not words:
         return [1.0 / math.sqrt(dim)] * dim
     for w in words:
-        h = int(hashlib.md5(w.encode("utf-8")).hexdigest(), 16)
+        h = int(hashlib.md5(w.encode("utf-8"), usedforsecurity=False).hexdigest(), 16)
         idx = h % dim
         sign = 1.0 if ((h >> 10) & 1) == 0 else -1.0
         vec[idx] += sign

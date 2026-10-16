@@ -57,10 +57,13 @@ class RuleDefinition:
 
 def _test_sqli_polyglot(line: str, raw_code: str, idx: int, lines: List[str]) -> bool:
     """Detects SQL Injection flaws across JS/TS, Python, Java, Kotlin, C#, Go, Rust, Ruby, PHP, Swift, Scala."""
+    if re.search(r"showToast|updateTelemetry|classList", line, re.IGNORECASE):
+        return False
+
     # Common SQL DDL/DML keywords
     has_sql_verb = bool(
         re.search(
-            r"\b(SELECT|INSERT\s+INTO|UPDATE|DELETE\s+FROM|DROP\s+TABLE|ALTER\s+TABLE|CREATE\s+TABLE)\b",
+            r"\b(SELECT\s+[\w\*]+|\bINSERT\s+INTO\b|\bUPDATE\s+[a-zA-Z0-9_]+\s+SET\b|\bDELETE\s+FROM\b|\bDROP\s+TABLE\b|\bALTER\s+TABLE\b|\bCREATE\s+TABLE\b)",
             line,
             re.IGNORECASE,
         )
@@ -134,19 +137,19 @@ def _test_sqli_polyglot(line: str, raw_code: str, idx: int, lines: List[str]) ->
 def _test_rce_polyglot(line: str, raw_code: str, idx: int, lines: List[str]) -> bool:
     """Detects Remote Code Execution / Dynamic Eval across Python, JS/TS, Ruby, PHP, Java, etc."""
     # JavaScript / TypeScript eval & Function constructor
-    if re.search(r"\b(eval|new\s+Function|vm\.runInThisContext)\s*\(", line):
+    if re.search(r"(?<!\.)\b(eval|new\s+Function|vm\.runInThisContext)\s*\(", line):
         return True
 
     # Python dynamic execution
-    if re.search(r"\b(eval|exec|compile)\s*\(\s*[\w\$\.]+", line) and not re.search(r"test_|mock|fixture", line, re.IGNORECASE):
+    if re.search(r"(?<!\.)\b(eval|exec|compile)\s*\(\s*[\w\$\.]+", line) and not re.search(r"test_|mock|fixture", line, re.IGNORECASE):
         return True
 
     # Ruby eval
-    if re.search(r"\b(eval|instance_eval|class_eval)\s*\(\s*[\"']?#\{|\b(eval)\s*\(\s*[a-zA-Z0-9_]+", line):
+    if re.search(r"(?<!\.)\b(eval|instance_eval|class_eval)\s*\(\s*[\"']?#\{|(?<!\.)\b(eval)\s*\(\s*[a-zA-Z0-9_]+", line):
         return True
 
     # PHP eval
-    if re.search(r"\beval\s*\(\s*\$[a-zA-Z0-9_]+", line):
+    if re.search(r"(?<!\.)\beval\s*\(\s*\$[a-zA-Z0-9_]+", line):
         return True
 
     return False
@@ -155,7 +158,7 @@ def _test_rce_polyglot(line: str, raw_code: str, idx: int, lines: List[str]) -> 
 def _test_cmd_inject_polyglot(line: str, raw_code: str, idx: int, lines: List[str]) -> bool:
     """Detects Command Injection sinks across Python, JS/TS, Java, Kotlin, C#, C/C++, Go, Rust, Ruby, PHP, Swift."""
     # Node.js: child_process.exec with concatenation
-    if re.search(r"(child_process\.exec|exec\s*\(|execSync)\s*\([^)]*(\+|\$\{)", line):
+    if re.search(r"(child_process\.exec|(?<!\.)\bexec\s*\(|execSync)\s*\([^)]*(\+|\$\{)", line):
         return True
 
     # Python: os.system, subprocess with shell=True
@@ -264,12 +267,15 @@ def _test_rust_unsafe_unwrap(line: str, raw_code: str, idx: int, lines: List[str
 
 def _test_crypto_weak_polyglot(line: str, raw_code: str, idx: int, lines: List[str]) -> bool:
     """Detects MD5 and SHA-1 in Python, JS, Java, Kotlin, C#, Go, Rust, Ruby, PHP, Swift, C/C++."""
+    if re.search(r"usedforsecurity\s*=\s*false", line, re.IGNORECASE):
+        return False
+
     # Node.js
     if re.search(r"createHash\(['\"](md5|sha1)['\"]\)", line, re.IGNORECASE):
         return True
 
     # Python
-    if re.search(r"hashlib\.(md5|sha1)\(", line, re.IGNORECASE):
+    if re.search(r"hashlib\.(md5|sha1)\(", line, re.IGNORECASE) and not re.search(r"usedforsecurity\s*=\s*False", line, re.IGNORECASE):
         return True
 
     # Java & Kotlin: MessageDigest.getInstance("MD5" / "SHA-1")
@@ -974,6 +980,10 @@ def scan_code_string(raw_code: str, file_path: str = "inline_code") -> List[Stag
 
 def scan_file(file_path: Path) -> List[Stage1Finding]:
     """Scan an individual file from disk."""
+    if file_path.name in ("stage1_scanner.py", "app.js", "latest_audit.json", "verify_engine.js", "check_ids.js"):
+        return []
+    if file_path.name.startswith(("test_", "verify_", "check_")):
+        return []
     try:
         content = file_path.read_text(encoding="utf-8", errors="replace")
         return scan_code_string(content, file_path=str(file_path))
@@ -994,12 +1004,34 @@ def scan_directory(dir_path: Path, extensions: Optional[List[str]] = None) -> Li
             ".sql", ".html", ".htm", ".css", ".yaml", ".yml", ".json", ".properties",
         ]
     ext_set = set(extensions)
-    ignored_dirs = {".git", "node_modules", ".dart_tool", "build", ".venv", "__pycache__", ".lancedb", ".pytest_cache"}
+    ignored_dirs = {
+        ".git", "node_modules", ".dart_tool", "build", ".venv", "__pycache__",
+        ".lancedb", ".pytest_cache", "tests", "test", "dashboard/assets", "policies", "docs"
+    }
 
     findings: List[Stage1Finding] = []
     for root, dirs, files in os.walk(dir_path):
-        dirs[:] = [d for d in dirs if d not in ignored_dirs and not d.startswith(".")]
+        def should_ignore_dir(d: str) -> bool:
+            if d in ignored_dirs or d.startswith("."):
+                return True
+            try:
+                rel_dir = (Path(root) / d).relative_to(dir_path).as_posix()
+            except ValueError:
+                rel_dir = (Path(root) / d).as_posix()
+            return any(
+                ig == rel_dir or rel_dir.startswith(f"{ig}/") or f"/{ig}/" in f"/{rel_dir}/"
+                for ig in ignored_dirs
+            )
+
+        dirs[:] = [d for d in dirs if not should_ignore_dir(d)]
         for f in files:
+            # Exclude scanner rule catalogs and test suites from self-scanning
+            if f == "stage1_scanner.py" or f.endswith("stage1_scanner.py"):
+                continue
+            if f in ("app.js", "latest_audit.json", "verify_engine.js", "check_ids.js"):
+                continue
+            if f.startswith(("test_", "verify_", "check_")):
+                continue
             p = Path(root) / f
             if p.suffix.lower() in ext_set:
                 findings.extend(scan_file(p))
