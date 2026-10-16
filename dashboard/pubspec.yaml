@@ -1,0 +1,25 @@
+name: dashboard
+description: "Cortex-Compliance: Polyglot, Self-Healing Agentic RAG Command Center"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: ^2.8.0
+  fl_chart: ^0.70.0
+  google_fonts: ^6.2.1
+  http: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/latest_audit.json

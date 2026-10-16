@@ -1,0 +1,257 @@
+{
+  "audit_id": "audit-20261016112709-b2bac1",
+  "timestamp": "2026-10-16T11:27:09.934072+00:00",
+  "repo_name": "compliance-checker",
+  "commit_sha": "local-dev",
+  "branch": "main",
+  "scan_summary": "Cortex-Compliance scan identified 4 potential issue(s). 4 confirmed violation(s), 0 mitigated externally, 0 false positive(s). Compliance Health Score: 40/100.",
+  "health_score": 40,
+  "total_findings": 4,
+  "confirmed_violations": 4,
+  "false_positives": 0,
+  "mitigated_count": 0,
+  "pipeline_steps": [
+    "Stage 1: Fast Deterministic Filter executed (4 triggers)",
+    "Stage 2: Hybrid Policy Retrieval (12 clauses indexed)",
+    "Stage 2: Citation Grading & Pruning (12 certified citations)",
+    "Stage 2: Polyglot Cross-File Semantic Tracing complete",
+    "Stage 2: Verdict Synthesis (4 verdicts rendered)",
+    "Stage 2: Self-Healing Patch Generation (4 diffs produced)"
+  ],
+  "findings": [
+    {
+      "stage1": {
+        "finding_id": "SEC-SQLI-01-test_live_scan.py-10-123e73",
+        "file_path": "test_live_scan.py",
+        "line": 10,
+        "rule_id": "SEC-SQLI-01",
+        "category": "Database Attacks",
+        "title": "SQL Injection Flaw (Raw Concatenation into Query)",
+        "severity": "critical",
+        "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command",
+        "owasp": "OWASP Top 10 A03:2021 - Injection",
+        "compliance_control": "DATA-03",
+        "exploit": "Attackers can inject malicious SQL payloads (e.g. `' OR 1=1 --`) to bypass authorization or dump database tables.",
+        "snippet": "\"Java SQL Injection\": (\"UserController.java\", 'Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(\"SELECT * FROM users WHERE user = \\'\" + username + \"\\'\");'),",
+        "bad_code": "const sql = \"SELECT * FROM users WHERE user = '\" + input + \"'\";",
+        "good_code": "const sql = 'SELECT * FROM users WHERE user = $1';\nconst result = await db.query(sql, [input]);"
+      },
+      "verdict": {
+        "finding_id": "SEC-SQLI-01-test_live_scan.py-10-123e73",
+        "status": "CONFIRMED_VIOLATION",
+        "confidence": 0.98,
+        "reason": "Confirmed vulnerability violating DATA-03. Exploit: Attackers can inject malicious SQL payloads (e.g. `' OR 1=1 --`) to bypass authorization or dump database tables.",
+        "root_cause_analysis": "Unsanitized or unverified code at line 10 in test_live_scan.py.",
+        "cross_file_impacts": []
+      },
+      "citations": [
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "text": "### A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)\n- **Violation Patterns**:\n  - **SQL Injection (CWE-89 / `SEC-SQLI-01`, `SEC-SQLI-02`)**: Raw string concatenation, f-strings, or unparameterized queries sent to database drivers (`query(...)`, `cursor.execute(...)`).\n  - **Command Injection (CWE-78 / `SEC-CMD-INJECT`)**: Executing shell commands (`child_process.exec`, `os.system`, `subprocess.Popen(..., shell=True)`) with concatenated user parameters.\n  - **Cross-Site Scripting (CWE-79 / `SEC-XSS-DOM`)**: Injecting unescaped user input into DOM via `innerHTML`, `outerHTML`, or `dangerouslySetInnerHTML`.\n  - **Dynamic Code Evaluation (CWE-95 / `SEC-RCE-EVAL`)**: Invoking `eval()`, `new Function()`, or dynamic runtime code compilers.\n- **Remediation Standard**:\n  - Use parameterized prepared statements (`$1, $2` or `?`).\n  - Use `execFile` with argument arrays instead of shell commands.\n  - Use `textContent`, safe templating engines, or DOMPurify sanitization.\n  - Eliminate `eval()`; use structured JSON parsers or safe AST evaluation.",
+          "legal_risk": "Non-compliance with A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "penalty_framework": "$1, $2` or `?`)",
+          "relevance_score": 0.378,
+          "is_graded_relevant": true
+        },
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "3. Automated Vulnerability Mapping",
+          "text": "## 3. Automated Vulnerability Mapping\n\n| Rule ID | Category | Severity | CWE | OWASP 2021 | Target Sink |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| `SEC-SQLI-01` | Database Attacks | Critical | CWE-89 | A03: Injection | Concatenated SQL strings |\n| `SEC-SQLI-02` | Database Attacks | Critical | CWE-89 | A03: Injection | Raw DB query execution |\n| `SEC-SECRET-AWS` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | AWS Access Key patterns |\n| `SEC-SECRET-OPENAI` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | OpenAI sk- patterns |\n| `SEC-SECRET-GITHUB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | GitHub ghp_ / pat_ tokens |\n| `SEC-SECRET-DB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | DB URI credentials |\n| `SEC-SECRET-JWT` | Secret Leak | High | CWE-321 | A02: Crypto Failures | Hardcoded JWT tokens/keys |\n| `SEC-RCE-EVAL` | Remote Code Exec | Critical | CWE-95 | A03: Injection | `eval()`, `new Function` |\n| `SEC-CMD-INJECT` | Remote Code Exec | Critical | CWE-78 | A03: Injection | `exec()`, `os.system` |\n| `SEC-XSS-DOM` | Injection & XSS | High | CWE-79 | A03: Injection | `innerHTML`, `dangerouslySet`|\n| `SEC-CRYPTO-WEAK` | Cryptography | High | CWE-328 | A02: Crypto Failures | MD5 / SHA-1 usage |",
+          "legal_risk": "Non-compliance with 3. Automated Vulnerability Mapping",
+          "penalty_framework": "Regulatory sanctions",
+          "relevance_score": 0.327,
+          "is_graded_relevant": true
+        }
+      ],
+      "patch": {
+        "file_path": "test_live_scan.py",
+        "start_line": 10,
+        "end_line": 10,
+        "original_code": "\"Java SQL Injection\": (\"UserController.java\", 'Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(\"SELECT * FROM users WHERE user = \\'\" + username + \"\\'\");'),",
+        "proposed_code": "const sql = 'SELECT * FROM users WHERE user = $1';\nconst result = await db.query(sql, [input]);",
+        "patch_diff": "--- a/test_live_scan.py\n+++ b/test_live_scan.py\n@@ -1 +1,2 @@\n-\"Java SQL Injection\": (\"UserController.java\", 'Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(\"SELECT * FROM users WHERE user = \\'\" + username + \"\\'\");'),+const sql = 'SELECT * FROM users WHERE user = $1';\n+const result = await db.query(sql, [input]);",
+        "auto_fix_safe": true,
+        "explanation": "Auto-generated compliant replacement conforming to DATA-03."
+      }
+    },
+    {
+      "stage1": {
+        "finding_id": "SEC-CMD-INJECT-test_live_scan.py-11-661fc0",
+        "file_path": "test_live_scan.py",
+        "line": 11,
+        "rule_id": "SEC-CMD-INJECT",
+        "category": "Remote Code Execution",
+        "title": "Command Injection Sink (child_process.exec / os.system / Process.Start)",
+        "severity": "critical",
+        "cwe": "CWE-78: Improper Neutralization of Special Elements used in an OS Command",
+        "owasp": "OWASP Top 10 A03:2021 - Injection",
+        "compliance_control": "OPS-01",
+        "exploit": "Attackers append command separators (; or |) to execute arbitrary host commands.",
+        "snippet": "\"C# Remote Code Exec\": (\"Diagnostics.cs\", 'Process.Start(\"ping.exe \" + host);'),",
+        "bad_code": "exec(\"ping -c 1 \" + req.query.target);",
+        "good_code": "execFile('ping', ['-c', '1', req.query.target]);"
+      },
+      "verdict": {
+        "finding_id": "SEC-CMD-INJECT-test_live_scan.py-11-661fc0",
+        "status": "CONFIRMED_VIOLATION",
+        "confidence": 0.98,
+        "reason": "Confirmed vulnerability violating OPS-01. Exploit: Attackers append command separators (; or |) to execute arbitrary host commands.",
+        "root_cause_analysis": "Unsanitized or unverified code at line 11 in test_live_scan.py.",
+        "cross_file_impacts": []
+      },
+      "citations": [
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "text": "### A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)\n- **Violation Patterns**:\n  - **SQL Injection (CWE-89 / `SEC-SQLI-01`, `SEC-SQLI-02`)**: Raw string concatenation, f-strings, or unparameterized queries sent to database drivers (`query(...)`, `cursor.execute(...)`).\n  - **Command Injection (CWE-78 / `SEC-CMD-INJECT`)**: Executing shell commands (`child_process.exec`, `os.system`, `subprocess.Popen(..., shell=True)`) with concatenated user parameters.\n  - **Cross-Site Scripting (CWE-79 / `SEC-XSS-DOM`)**: Injecting unescaped user input into DOM via `innerHTML`, `outerHTML`, or `dangerouslySetInnerHTML`.\n  - **Dynamic Code Evaluation (CWE-95 / `SEC-RCE-EVAL`)**: Invoking `eval()`, `new Function()`, or dynamic runtime code compilers.\n- **Remediation Standard**:\n  - Use parameterized prepared statements (`$1, $2` or `?`).\n  - Use `execFile` with argument arrays instead of shell commands.\n  - Use `textContent`, safe templating engines, or DOMPurify sanitization.\n  - Eliminate `eval()`; use structured JSON parsers or safe AST evaluation.",
+          "legal_risk": "Non-compliance with A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "penalty_framework": "$1, $2` or `?`)",
+          "relevance_score": 0.378,
+          "is_graded_relevant": true
+        },
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "3. Automated Vulnerability Mapping",
+          "text": "## 3. Automated Vulnerability Mapping\n\n| Rule ID | Category | Severity | CWE | OWASP 2021 | Target Sink |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| `SEC-SQLI-01` | Database Attacks | Critical | CWE-89 | A03: Injection | Concatenated SQL strings |\n| `SEC-SQLI-02` | Database Attacks | Critical | CWE-89 | A03: Injection | Raw DB query execution |\n| `SEC-SECRET-AWS` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | AWS Access Key patterns |\n| `SEC-SECRET-OPENAI` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | OpenAI sk- patterns |\n| `SEC-SECRET-GITHUB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | GitHub ghp_ / pat_ tokens |\n| `SEC-SECRET-DB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | DB URI credentials |\n| `SEC-SECRET-JWT` | Secret Leak | High | CWE-321 | A02: Crypto Failures | Hardcoded JWT tokens/keys |\n| `SEC-RCE-EVAL` | Remote Code Exec | Critical | CWE-95 | A03: Injection | `eval()`, `new Function` |\n| `SEC-CMD-INJECT` | Remote Code Exec | Critical | CWE-78 | A03: Injection | `exec()`, `os.system` |\n| `SEC-XSS-DOM` | Injection & XSS | High | CWE-79 | A03: Injection | `innerHTML`, `dangerouslySet`|\n| `SEC-CRYPTO-WEAK` | Cryptography | High | CWE-328 | A02: Crypto Failures | MD5 / SHA-1 usage |",
+          "legal_risk": "Non-compliance with 3. Automated Vulnerability Mapping",
+          "penalty_framework": "Regulatory sanctions",
+          "relevance_score": 0.327,
+          "is_graded_relevant": true
+        }
+      ],
+      "patch": {
+        "file_path": "test_live_scan.py",
+        "start_line": 11,
+        "end_line": 11,
+        "original_code": "\"C# Remote Code Exec\": (\"Diagnostics.cs\", 'Process.Start(\"ping.exe \" + host);'),",
+        "proposed_code": "execFile('ping', ['-c', '1', req.query.target]);",
+        "patch_diff": "--- a/test_live_scan.py\n+++ b/test_live_scan.py\n@@ -1 +1 @@\n-\"C# Remote Code Exec\": (\"Diagnostics.cs\", 'Process.Start(\"ping.exe \" + host);'),+execFile('ping', ['-c', '1', req.query.target]);",
+        "auto_fix_safe": true,
+        "explanation": "Auto-generated compliant replacement conforming to OPS-01."
+      }
+    },
+    {
+      "stage1": {
+        "finding_id": "SEC-SQLI-01-test_live_scan.py-14-1269d0",
+        "file_path": "test_live_scan.py",
+        "line": 14,
+        "rule_id": "SEC-SQLI-01",
+        "category": "Database Attacks",
+        "title": "SQL Injection Flaw (Raw Concatenation into Query)",
+        "severity": "critical",
+        "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command",
+        "owasp": "OWASP Top 10 A03:2021 - Injection",
+        "compliance_control": "DATA-03",
+        "exploit": "Attackers can inject malicious SQL payloads (e.g. `' OR 1=1 --`) to bypass authorization or dump database tables.",
+        "snippet": "\"Go SQL Injection\": (\"repo.go\", 'query := fmt.Sprintf(\"SELECT * FROM items WHERE id = \\'%s\\'\", id)'),",
+        "bad_code": "const sql = \"SELECT * FROM users WHERE user = '\" + input + \"'\";",
+        "good_code": "const sql = 'SELECT * FROM users WHERE user = $1';\nconst result = await db.query(sql, [input]);"
+      },
+      "verdict": {
+        "finding_id": "SEC-SQLI-01-test_live_scan.py-14-1269d0",
+        "status": "CONFIRMED_VIOLATION",
+        "confidence": 0.98,
+        "reason": "Confirmed vulnerability violating DATA-03. Exploit: Attackers can inject malicious SQL payloads (e.g. `' OR 1=1 --`) to bypass authorization or dump database tables.",
+        "root_cause_analysis": "Unsanitized or unverified code at line 14 in test_live_scan.py.",
+        "cross_file_impacts": []
+      },
+      "citations": [
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "text": "### A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)\n- **Violation Patterns**:\n  - **SQL Injection (CWE-89 / `SEC-SQLI-01`, `SEC-SQLI-02`)**: Raw string concatenation, f-strings, or unparameterized queries sent to database drivers (`query(...)`, `cursor.execute(...)`).\n  - **Command Injection (CWE-78 / `SEC-CMD-INJECT`)**: Executing shell commands (`child_process.exec`, `os.system`, `subprocess.Popen(..., shell=True)`) with concatenated user parameters.\n  - **Cross-Site Scripting (CWE-79 / `SEC-XSS-DOM`)**: Injecting unescaped user input into DOM via `innerHTML`, `outerHTML`, or `dangerouslySetInnerHTML`.\n  - **Dynamic Code Evaluation (CWE-95 / `SEC-RCE-EVAL`)**: Invoking `eval()`, `new Function()`, or dynamic runtime code compilers.\n- **Remediation Standard**:\n  - Use parameterized prepared statements (`$1, $2` or `?`).\n  - Use `execFile` with argument arrays instead of shell commands.\n  - Use `textContent`, safe templating engines, or DOMPurify sanitization.\n  - Eliminate `eval()`; use structured JSON parsers or safe AST evaluation.",
+          "legal_risk": "Non-compliance with A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "penalty_framework": "$1, $2` or `?`)",
+          "relevance_score": 0.378,
+          "is_graded_relevant": true
+        },
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "3. Automated Vulnerability Mapping",
+          "text": "## 3. Automated Vulnerability Mapping\n\n| Rule ID | Category | Severity | CWE | OWASP 2021 | Target Sink |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| `SEC-SQLI-01` | Database Attacks | Critical | CWE-89 | A03: Injection | Concatenated SQL strings |\n| `SEC-SQLI-02` | Database Attacks | Critical | CWE-89 | A03: Injection | Raw DB query execution |\n| `SEC-SECRET-AWS` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | AWS Access Key patterns |\n| `SEC-SECRET-OPENAI` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | OpenAI sk- patterns |\n| `SEC-SECRET-GITHUB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | GitHub ghp_ / pat_ tokens |\n| `SEC-SECRET-DB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | DB URI credentials |\n| `SEC-SECRET-JWT` | Secret Leak | High | CWE-321 | A02: Crypto Failures | Hardcoded JWT tokens/keys |\n| `SEC-RCE-EVAL` | Remote Code Exec | Critical | CWE-95 | A03: Injection | `eval()`, `new Function` |\n| `SEC-CMD-INJECT` | Remote Code Exec | Critical | CWE-78 | A03: Injection | `exec()`, `os.system` |\n| `SEC-XSS-DOM` | Injection & XSS | High | CWE-79 | A03: Injection | `innerHTML`, `dangerouslySet`|\n| `SEC-CRYPTO-WEAK` | Cryptography | High | CWE-328 | A02: Crypto Failures | MD5 / SHA-1 usage |",
+          "legal_risk": "Non-compliance with 3. Automated Vulnerability Mapping",
+          "penalty_framework": "Regulatory sanctions",
+          "relevance_score": 0.327,
+          "is_graded_relevant": true
+        }
+      ],
+      "patch": {
+        "file_path": "test_live_scan.py",
+        "start_line": 14,
+        "end_line": 14,
+        "original_code": "\"Go SQL Injection\": (\"repo.go\", 'query := fmt.Sprintf(\"SELECT * FROM items WHERE id = \\'%s\\'\", id)'),",
+        "proposed_code": "const sql = 'SELECT * FROM users WHERE user = $1';\nconst result = await db.query(sql, [input]);",
+        "patch_diff": "--- a/test_live_scan.py\n+++ b/test_live_scan.py\n@@ -1 +1,2 @@\n-\"Go SQL Injection\": (\"repo.go\", 'query := fmt.Sprintf(\"SELECT * FROM items WHERE id = \\'%s\\'\", id)'),+const sql = 'SELECT * FROM users WHERE user = $1';\n+const result = await db.query(sql, [input]);",
+        "auto_fix_safe": true,
+        "explanation": "Auto-generated compliant replacement conforming to DATA-03."
+      }
+    },
+    {
+      "stage1": {
+        "finding_id": "SEC-SECRET-OPENAI-test_live_scan.py-16-3b5ecd",
+        "file_path": "test_live_scan.py",
+        "line": 16,
+        "rule_id": "SEC-SECRET-OPENAI",
+        "category": "Secret Leak",
+        "title": "Exposed OpenAI / LLM API Key",
+        "severity": "critical",
+        "cwe": "CWE-798: Hardcoded Credentials",
+        "owasp": "OWASP Top 10 A07:2021 - Identification & Authentication Failures",
+        "compliance_control": "DATA-02",
+        "exploit": "Attackers drain API credit quotas, fine-tune unauthorized models, or access prompt telemetry.",
+        "snippet": "\"Python Secret Leak\": (\"service.py\", 'OPENAI_API_KEY = \"sk-proj-abc123456789012345678901234567890\"')",
+        "bad_code": "const client = new OpenAI({ apiKey: \"sk-proj-xyz1234567890abcdef123\" });",
+        "good_code": "const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });"
+      },
+      "verdict": {
+        "finding_id": "SEC-SECRET-OPENAI-test_live_scan.py-16-3b5ecd",
+        "status": "CONFIRMED_VIOLATION",
+        "confidence": 0.98,
+        "reason": "Confirmed vulnerability violating DATA-02. Exploit: Attackers drain API credit quotas, fine-tune unauthorized models, or access prompt telemetry.",
+        "root_cause_analysis": "Unsanitized or unverified code at line 16 in test_live_scan.py.",
+        "cross_file_impacts": []
+      },
+      "citations": [
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "text": "### A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)\n- **Violation Patterns**:\n  - **SQL Injection (CWE-89 / `SEC-SQLI-01`, `SEC-SQLI-02`)**: Raw string concatenation, f-strings, or unparameterized queries sent to database drivers (`query(...)`, `cursor.execute(...)`).\n  - **Command Injection (CWE-78 / `SEC-CMD-INJECT`)**: Executing shell commands (`child_process.exec`, `os.system`, `subprocess.Popen(..., shell=True)`) with concatenated user parameters.\n  - **Cross-Site Scripting (CWE-79 / `SEC-XSS-DOM`)**: Injecting unescaped user input into DOM via `innerHTML`, `outerHTML`, or `dangerouslySetInnerHTML`.\n  - **Dynamic Code Evaluation (CWE-95 / `SEC-RCE-EVAL`)**: Invoking `eval()`, `new Function()`, or dynamic runtime code compilers.\n- **Remediation Standard**:\n  - Use parameterized prepared statements (`$1, $2` or `?`).\n  - Use `execFile` with argument arrays instead of shell commands.\n  - Use `textContent`, safe templating engines, or DOMPurify sanitization.\n  - Eliminate `eval()`; use structured JSON parsers or safe AST evaluation.",
+          "legal_risk": "Non-compliance with A03:2021 - Injection (CWE-78, CWE-79, CWE-89, CWE-95)",
+          "penalty_framework": "$1, $2` or `?`)",
+          "relevance_score": 0.378,
+          "is_graded_relevant": true
+        },
+        {
+          "policy_id": "OWASP_TOP_10",
+          "policy_title": "owasp_top_10.md",
+          "section_or_article": "3. Automated Vulnerability Mapping",
+          "text": "## 3. Automated Vulnerability Mapping\n\n| Rule ID | Category | Severity | CWE | OWASP 2021 | Target Sink |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| `SEC-SQLI-01` | Database Attacks | Critical | CWE-89 | A03: Injection | Concatenated SQL strings |\n| `SEC-SQLI-02` | Database Attacks | Critical | CWE-89 | A03: Injection | Raw DB query execution |\n| `SEC-SECRET-AWS` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | AWS Access Key patterns |\n| `SEC-SECRET-OPENAI` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | OpenAI sk- patterns |\n| `SEC-SECRET-GITHUB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | GitHub ghp_ / pat_ tokens |\n| `SEC-SECRET-DB` | Secret Leak | Critical | CWE-798 | A07: Auth Failures | DB URI credentials |\n| `SEC-SECRET-JWT` | Secret Leak | High | CWE-321 | A02: Crypto Failures | Hardcoded JWT tokens/keys |\n| `SEC-RCE-EVAL` | Remote Code Exec | Critical | CWE-95 | A03: Injection | `eval()`, `new Function` |\n| `SEC-CMD-INJECT` | Remote Code Exec | Critical | CWE-78 | A03: Injection | `exec()`, `os.system` |\n| `SEC-XSS-DOM` | Injection & XSS | High | CWE-79 | A03: Injection | `innerHTML`, `dangerouslySet`|\n| `SEC-CRYPTO-WEAK` | Cryptography | High | CWE-328 | A02: Crypto Failures | MD5 / SHA-1 usage |",
+          "legal_risk": "Non-compliance with 3. Automated Vulnerability Mapping",
+          "penalty_framework": "Regulatory sanctions",
+          "relevance_score": 0.327,
+          "is_graded_relevant": true
+        }
+      ],
+      "patch": {
+        "file_path": "test_live_scan.py",
+        "start_line": 16,
+        "end_line": 16,
+        "original_code": "\"Python Secret Leak\": (\"service.py\", 'OPENAI_API_KEY = \"sk-proj-abc123456789012345678901234567890\"')",
+        "proposed_code": "const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });",
+        "patch_diff": "--- a/test_live_scan.py\n+++ b/test_live_scan.py\n@@ -1 +1 @@\n-\"Python Secret Leak\": (\"service.py\", 'OPENAI_API_KEY = \"sk-proj-abc123456789012345678901234567890\"')+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });",
+        "auto_fix_safe": true,
+        "explanation": "Auto-generated compliant replacement conforming to DATA-02."
+      }
+    }
+  ],
+  "lancedb_synced": true,
+  "supabase_synced": false
+}

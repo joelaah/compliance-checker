@@ -1,0 +1,9 @@
+{
+  "name": "Cortex-Compliance Command Center",
+  "short_name": "Cortex",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#090D16",
+  "theme_color": "#10B981",
+  "description": "Polyglot Self-Healing Agentic RAG Compliance Engine"
+}
