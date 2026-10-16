@@ -1,6 +1,6 @@
 {
-  "audit_id": "audit-20261016133120-3ef73b",
-  "timestamp": "2026-10-16T13:31:20.483045+00:00",
+  "audit_id": "audit-20261016140910-43a70c",
+  "timestamp": "2026-10-16T14:09:10.985442+00:00",
   "repo_name": "compliance-checker",
   "commit_sha": "local-dev",
   "branch": "main",
@@ -21,8 +21,8 @@
   "findings": [
     {
       "stage1": {
-        "finding_id": "SEC-SQLI-01-DbService.py-3-39ed89",
-        "file_path": "C:\\Users\\joela\\AppData\\Local\\Temp\\pytest-of-joela\\pytest-48\\test_github_pr_bot_formatting0\\DbService.py",
+        "finding_id": "SEC-SQLI-01-DbService.py-3-831c9e",
+        "file_path": "C:\\Users\\joela\\AppData\\Local\\Temp\\pytest-of-joela\\pytest-49\\test_github_pr_bot_formatting0\\DbService.py",
         "line": 3,
         "rule_id": "SEC-SQLI-01",
         "category": "Database Attacks",
@@ -37,11 +37,11 @@
         "good_code": "const sql = 'SELECT * FROM users WHERE user = $1';\nconst result = await db.query(sql, [input]);"
       },
       "verdict": {
-        "finding_id": "SEC-SQLI-01-DbService.py-3-39ed89",
+        "finding_id": "SEC-SQLI-01-DbService.py-3-831c9e",
         "status": "CONFIRMED_VIOLATION",
         "confidence": 0.98,
         "reason": "Confirmed vulnerability violating DATA-03. Exploit: Attackers can inject malicious SQL payloads (e.g. `' OR 1=1 --`) to bypass authorization or dump database tables.",
-        "root_cause_analysis": "Unsanitized or unverified code at line 3 in C:\\Users\\joela\\AppData\\Local\\Temp\\pytest-of-joela\\pytest-48\\test_github_pr_bot_formatting0\\DbService.py.",
+        "root_cause_analysis": "Unsanitized or unverified code at line 3 in C:\\Users\\joela\\AppData\\Local\\Temp\\pytest-of-joela\\pytest-49\\test_github_pr_bot_formatting0\\DbService.py.",
         "cross_file_impacts": []
       },
       "citations": [
@@ -67,7 +67,7 @@
         }
       ],
       "patch": {
-        "file_path": "C:\\Users\\joela\\AppData\\Local\\Temp\\pytest-of-joela\\pytest-48\\test_github_pr_bot_formatting0\\DbService.py",
+        "file_path": "C:\\Users\\joela\\AppData\\Local\\Temp\\pytest-of-joela\\pytest-49\\test_github_pr_bot_formatting0\\DbService.py",
         "start_line": 3,
         "end_line": 3,
         "original_code": "cursor.execute(f\"SELECT * FROM users WHERE id = '{user_id}'\")",

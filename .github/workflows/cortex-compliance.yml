@@ -38,22 +38,11 @@ jobs:
         with:
           version: "latest"
           enable-cache: true
-
-      - name: Cache LanceDB & Dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            .lancedb
-            .venv
-          key: ${{ runner.os }}-cortex-${{ hashFiles('pyproject.toml') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-cortex-${{ hashFiles('pyproject.toml') }}-
-            ${{ runner.os }}-cortex-
+          cache-dependency-glob: "uv.lock"
 
       - name: Install Dependencies
         run: |
-          uv venv .venv
-          uv pip install -e ".[dev]"
+          uv sync --extra dev
 
       - name: Setup Local Ollama Engine
         run: |
