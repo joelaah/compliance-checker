@@ -1,24 +1,22 @@
-name: Deploy Cortex-Compliance Command Center (Flutter WASM)
+name: Build Cortex-Compliance Command Center (Flutter WASM)
 
 on:
   push:
     branches: [main]
+    paths:
+      - "dashboard/**"
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
+  group: "flutter-build"
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
+    name: Build & Package Flutter WASM
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -29,9 +27,6 @@ jobs:
         with:
           channel: "stable"
           cache: true
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
 
       - name: Install Flutter Dependencies
         run: |
@@ -44,11 +39,8 @@ jobs:
           REPO_NAME="${{ github.event.repository.name }}"
           flutter build web --wasm --base-href "/${REPO_NAME}/"
 
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload Flutter Web Artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: "dashboard/build/web"
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: flutter-wasm-dashboard
+          path: dashboard/build/web

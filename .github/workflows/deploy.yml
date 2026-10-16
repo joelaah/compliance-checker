@@ -3,6 +3,8 @@ name: Deploy ComplianceShield to GitHub Pages
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - "dashboard/**"
   workflow_dispatch:
 
 permissions:
@@ -24,13 +26,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Stage Clean Web Distribution
+        run: |
+          mkdir -p _site
+          cp index.html app.js styles.css _site/
+          [ -f favicon.ico ] && cp favicon.ico _site/ || true
+          [ -f manifest.json ] && cp manifest.json _site/ || true
+          [ -d assets ] && cp -r assets _site/ || true
+          [ -d dashboard/assets ] && mkdir -p _site/dashboard && cp -r dashboard/assets _site/dashboard/ || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment

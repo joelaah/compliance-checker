@@ -2539,3 +2539,613 @@ body {
     color: #111827 !important;
   }
 }
+
+/* ==========================================================================
+   Enterprise Command Center & Ingestion Panels
+   ========================================================================== */
+.command-center-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  padding-top: 14px;
+}
+
+.flex-3 {
+  flex: 3 1 300px;
+}
+
+.input-prefix-wrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.input-prefix-wrapper:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+}
+
+.input-prefix {
+  padding: 0 12px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-right: 1px solid var(--border-subtle);
+  height: 42px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.input-prefix-wrapper input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  height: 42px;
+  padding: 0 14px;
+  flex: 1;
+  color: var(--text-white);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+}
+
+.input-prefix-wrapper input:focus {
+  outline: none;
+}
+
+.label-opt {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: none;
+}
+
+.btn-glow {
+  position: relative;
+  background: var(--grad-aurora) !important;
+  color: #07090e !important;
+  font-weight: 700 !important;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);
+  transition: var(--transition);
+}
+
+.btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 26px rgba(56, 189, 248, 0.5);
+}
+
+.command-center-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.meta-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta-shortcuts-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-link-btn {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: var(--cyan);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.preset-link-btn:hover {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: var(--cyan);
+  color: #fff;
+}
+
+.meta-hint-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Live Ingestion & Telemetry Progress Panel
+   ========================================================================== */
+.scan-telemetry-panel {
+  margin-top: 18px;
+  background: rgba(13, 18, 28, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.telemetry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.telemetry-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-white);
+}
+
+.status-dot.pulse {
+  animation: pulseDot 1.2s infinite;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+.telemetry-percent {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.telemetry-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.telemetry-bar-fill {
+  height: 100%;
+  background: var(--grad-aurora);
+  border-radius: 999px;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.telemetry-footer {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Enterprise File Tree & Split Diff Browser Grid
+   ========================================================================== */
+.codescan-browser-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .codescan-browser-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.file-tree-sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  max-height: 720px;
+  overflow: hidden;
+}
+
+.file-tree-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.file-tree-search-box input {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  width: 100%;
+  outline: none;
+}
+
+.file-tree-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 4px;
+  max-height: 640px;
+}
+
+.empty-tree-state {
+  padding: 30px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.tree-file-node {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tree-file-node:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.tree-file-node.active {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.15);
+}
+
+.tree-file-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tree-file-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-badge-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+  color: var(--rose);
+}
+
+.tree-badge-count.clean {
+  background: var(--green-bg);
+  border-color: var(--green-border);
+  color: var(--emerald);
+}
+
+.tree-finding-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tree-finding-item:hover, .tree-finding-item.selected {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--text-white);
+  border-left-color: var(--cyan);
+}
+
+/* ==========================================================================
+   Active Finding Inspector & Split Code Diff Viewer
+   ========================================================================== */
+.active-inspector-panel {
+  padding: 22px;
+  min-height: 480px;
+}
+
+.empty-state-shield-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cyan);
+  margin: 0 auto 16px auto;
+}
+
+.split-diff-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.diff-meta-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.diff-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.diff-file-tag {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--cyan);
+  font-weight: 600;
+}
+
+.diff-title-row h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-white);
+  letter-spacing: -0.01em;
+}
+
+.diff-framework-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.exploit-callout {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 0.86rem;
+  color: #fecdd3;
+  line-height: 1.5;
+}
+
+.exploit-callout strong {
+  color: var(--rose);
+}
+
+.split-diff-view-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .split-diff-view-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.diff-pane {
+  display: flex;
+  flex-direction: column;
+  background: #080c14;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.diff-pane-bad {
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+.diff-pane-good {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.diff-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.diff-pane-bad .diff-pane-header {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--rose);
+}
+
+.diff-pane-good .diff-pane-header {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--emerald);
+}
+
+.btn-copy-remediation {
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: var(--emerald);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-copy-remediation:hover {
+  background: rgba(52, 211, 153, 0.3);
+  color: #fff;
+}
+
+.diff-code-box {
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  background: transparent;
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.diff-pane-bad .diff-code-box {
+  background: rgba(244, 63, 94, 0.03);
+}
+
+.diff-pane-good .diff-code-box {
+  background: rgba(52, 211, 153, 0.03);
+}
+
+.raw-editor-drawer {
+  padding: 16px;
+  border: 1px solid rgba(129, 140, 248, 0.25);
+  animation: fadeIn 0.2s ease;
+}
+
+/* ==========================================================================
+   Line-by-Line Split Diff Highlighting & Clean State Inspector
+   ========================================================================== */
+.diff-line-row {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  min-height: 22px;
+  padding: 1px 0;
+}
+
+.diff-line-num {
+  width: 38px;
+  min-width: 38px;
+  text-align: right;
+  padding-right: 12px;
+  color: var(--text-muted);
+  user-select: none;
+  opacity: 0.6;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  margin-right: 10px;
+}
+
+.diff-line-content {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.diff-line-highlight-bad {
+  background: rgba(244, 63, 94, 0.16);
+  border-left: 3px solid var(--rose);
+}
+
+.diff-line-highlight-bad .diff-line-num {
+  color: var(--rose);
+  opacity: 1;
+  font-weight: 700;
+}
+
+.diff-line-highlight-good {
+  background: rgba(52, 211, 153, 0.07);
+}
+
+.diff-line-highlight-good .diff-line-num {
+  color: var(--emerald);
+  opacity: 0.9;
+}
+
+.clean-file-inspector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.clean-shield-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--emerald);
+  margin-bottom: 16px;
+}
+
+.clean-shield-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.clean-file-inspector h3 {
+  color: var(--emerald);
+  font-size: 1.25rem;
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+
+.clean-file-inspector p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.btn-copy-remediation.copied {
+  background: var(--emerald) !important;
+  color: #05160d !important;
+  border-color: var(--emerald) !important;
+  font-weight: 800 !important;
+}
+

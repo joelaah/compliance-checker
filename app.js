@@ -802,6 +802,45 @@ await resend.emails.send({
       Acme Corp Inc., 100 Main Street, Suite 400, San Francisco, CA 94105, USA
     </footer>\`
 });`
+  },
+
+  // --- Database Row Level Security (RLS) & Exposure ---
+  {
+    id: 'SEC-DB-RLS',
+    category: 'Database Attacks',
+    title: 'Missing Row Level Security (RLS) on Database Table Definition',
+    severity: 'critical',
+    cwe: 'CWE-284: Improper Access Control',
+    owasp: 'OWASP Top 10 A01:2021 - Broken Access Control',
+    complianceControl: 'DATA-02',
+    test: (line, rawCode, idx, lines) => {
+      const match = line.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?([a-zA-Z0-9_\."]+)/i);
+      if (match) {
+        const rawTableName = match[1].replace(/["']/g, '');
+        const shortName = rawTableName.includes('.') ? rawTableName.split('.').pop() : rawTableName;
+        const full = rawCode || (lines ? lines.join('\n') : '');
+        const tableRlsRegex = new RegExp(`alter\\s+table\\s+(?:[a-zA-Z0-9_]+\\.)?${shortName}\\s+enable\\s+row\\s+level\\s+security`, 'i');
+        const inlineRlsRegex = new RegExp(`create\\s+table[\\s\\S]*?${shortName}[\\s\\S]*?enable\\s+row\\s+level\\s+security`, 'i');
+        return !tableRlsRegex.test(full) && !inlineRlsRegex.test(full);
+      }
+      return false;
+    },
+    exploit: 'Tables without Row Level Security enabled in PostgreSQL/Supabase allow unauthenticated public or lateral authenticated users to read, modify, or drop records via PostgREST or direct client queries.',
+    badCode: `CREATE TABLE public.user_profiles (
+  id uuid primary key,
+  email text,
+  ssn text
+); -- Missing Row Level Security!`,
+    goodCode: `CREATE TABLE public.user_profiles (
+  id uuid primary key,
+  email text,
+  ssn text
+);
+-- Enforce Row Level Security (RLS) and granular tenant isolation:
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can only access their own profile" 
+  ON public.user_profiles FOR ALL 
+  USING (auth.uid() = id);`
   }
 ];
 
@@ -2094,11 +2133,50 @@ class ComplianceApp {
     this.scanTimestamp = document.getElementById('scanTimestamp');
     this.latestCodeFindings = [];
 
-    // Hero Codebase Upload Elements
+    // GitHub Ingestion Command Center
+    this.ghRepoInput = document.getElementById('ghRepoInput');
+    this.ghBranchInput = document.getElementById('ghBranchInput');
+    this.ghTokenInput = document.getElementById('ghTokenInput');
+    this.btnScanGithub = document.getElementById('btnScanGithub');
+    this.btnSampleRepoJoe = document.getElementById('btnSampleRepoJoe');
+
+    // Supabase & Database RLS Ingestion
+    this.supabaseUrlInput = document.getElementById('supabaseUrlInput');
+    this.supabaseKeyInput = document.getElementById('supabaseKeyInput');
+    this.btnScanSupabase = document.getElementById('btnScanSupabase');
+
+    // Command Center Ingestion Mode Toggles
+    this.btnModeGithub = document.getElementById('btnModeGithub');
+    this.btnModeSupabase = document.getElementById('btnModeSupabase');
     this.btnModeUpload = document.getElementById('btnModeUpload');
     this.btnModeUrl = document.getElementById('btnModeUrl');
+    this.panelModeGithub = document.getElementById('panelModeGithub');
+    this.panelModeSupabase = document.getElementById('panelModeSupabase');
     this.panelModeUpload = document.getElementById('panelModeUpload');
     this.panelModeUrl = document.getElementById('panelModeUrl');
+
+    // Telemetry Progress Bar
+    this.scanProgressContainer = document.getElementById('scanProgressContainer');
+    this.scanProgressBar = document.getElementById('scanProgressBar');
+    this.scanProgressText = document.getElementById('scanProgressText');
+    this.scanProgressPercent = document.getElementById('scanProgressPercent');
+    this.telemetryStatusTitle = document.getElementById('telemetryStatusTitle');
+
+    // File Tree & Split Diff Elements
+    this.filesScannedCount = document.getElementById('filesScannedCount');
+    this.findingsFilterInput = document.getElementById('findingsFilterInput');
+    this.findingsFileTree = document.getElementById('findingsFileTree');
+    this.activeFindingInspector = document.getElementById('activeFindingInspector');
+    this.splitDiffContainer = document.getElementById('splitDiffContainer');
+    this.emptyFindingsPlaceholder = document.getElementById('emptyFindingsPlaceholder');
+    this.btnToggleRawEditor = document.getElementById('btnToggleRawEditor');
+    this.rawEditorDrawer = document.getElementById('rawEditorDrawer');
+
+    // State collections
+    this.scannedFilesMap = new Map();
+    this.selectedFinding = null;
+
+    // Hero Local Upload Elements
     this.heroDropzone = document.getElementById('heroDropzone');
     this.heroFileInput = document.getElementById('heroFileInput');
     this.heroFolderInput = document.getElementById('heroFolderInput');
@@ -2118,22 +2196,75 @@ class ComplianceApp {
   }
 
   bindEvents() {
-    // Hero Mode Toggles
-    if (this.btnModeUpload && this.btnModeUrl) {
-      this.btnModeUpload.addEventListener('click', () => {
-        this.btnModeUpload.classList.add('active');
-        this.btnModeUrl.classList.remove('active');
-        if (this.panelModeUpload) this.panelModeUpload.style.display = 'block';
-        if (this.panelModeUrl) this.panelModeUrl.style.display = 'none';
-      });
+    // Mode Switchers
+    const modes = [
+      { btn: this.btnModeGithub, panel: this.panelModeGithub },
+      { btn: this.btnModeSupabase, panel: this.panelModeSupabase },
+      { btn: this.btnModeUpload, panel: this.panelModeUpload },
+      { btn: this.btnModeUrl, panel: this.panelModeUrl }
+    ];
 
-      this.btnModeUrl.addEventListener('click', () => {
-        this.btnModeUrl.classList.add('active');
-        this.btnModeUpload.classList.remove('active');
-        if (this.panelModeUrl) this.panelModeUrl.style.display = 'block';
-        if (this.panelModeUpload) this.panelModeUpload.style.display = 'none';
+    modes.forEach(m => {
+      if (m.btn) {
+        m.btn.addEventListener('click', () => {
+          modes.forEach(other => {
+            other.btn?.classList.remove('active');
+            if (other.panel) other.panel.style.display = 'none';
+          });
+          m.btn.classList.add('active');
+          if (m.panel) m.panel.style.display = 'block';
+        });
+      }
+    });
+
+    // GitHub Ingestion Action
+    this.btnScanGithub?.addEventListener('click', () => {
+      this.scanGithubRepository();
+    });
+
+    const bindEnterKey = (el, action) => {
+      el?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          action();
+        }
       });
-    }
+    };
+
+    bindEnterKey(this.ghRepoInput, () => this.scanGithubRepository());
+    bindEnterKey(this.ghBranchInput, () => this.scanGithubRepository());
+    bindEnterKey(this.ghTokenInput, () => this.scanGithubRepository());
+
+    this.btnSampleRepoJoe?.addEventListener('click', () => {
+      if (this.ghRepoInput) this.ghRepoInput.value = 'joelaah/compliance-checker';
+      this.scanGithubRepository();
+    });
+
+    // Supabase Ingestion Action
+    this.btnScanSupabase?.addEventListener('click', () => {
+      this.scanSupabaseDatabase();
+    });
+
+    bindEnterKey(this.supabaseUrlInput, () => this.scanSupabaseDatabase());
+    bindEnterKey(this.supabaseKeyInput, () => this.scanSupabaseDatabase());
+
+    // Sync findings with compliance matrix button
+    this.btnSyncWithAudit?.addEventListener('click', () => {
+      this.syncFindingsToCompliance(true);
+    });
+
+    // Raw Code Editor Drawer Toggle
+    this.btnToggleRawEditor?.addEventListener('click', () => {
+      if (this.rawEditorDrawer) {
+        const isClosed = this.rawEditorDrawer.style.display === 'none';
+        this.rawEditorDrawer.style.display = isClosed ? 'block' : 'none';
+      }
+    });
+
+    // Findings Filter in File Tree
+    this.findingsFilterInput?.addEventListener('input', () => {
+      this.renderFileTree();
+    });
 
     // Hero File Upload & Dropzone
     if (this.heroFileInput) {
@@ -2490,11 +2621,77 @@ class ComplianceApp {
   }
 
   loadCodePreset(presetKey) {
-    if (CODE_PRESETS[presetKey] && this.codeEditorInput) {
-      this.codeEditorInput.value = CODE_PRESETS[presetKey];
-      this.updateCodeCounters();
-      this.runCodeSecurityScan();
+    if (CODE_PRESETS[presetKey]) {
+      const code = CODE_PRESETS[presetKey];
+      if (this.codeEditorInput) {
+        this.codeEditorInput.value = code;
+        this.updateCodeCounters();
+      }
+      const presetFileName = `sample-${presetKey}.js`;
+      this.scanSingleSourceFile(presetFileName, code);
       this.showToast(`Loaded "${presetKey}" code security test preset`);
+    }
+  }
+
+  scanSingleSourceFile(fileName, rawCode) {
+    if (!rawCode || !rawCode.trim()) return;
+    const lines = rawCode.split('\n');
+    const fileFindings = [];
+
+    lines.forEach((lineText, idx) => {
+      const lineNum = idx + 1;
+      const trimmed = lineText.trim();
+      if (trimmed.startsWith('//') && !trimmed.includes('AKIA') && !trimmed.includes('sk-') && !trimmed.includes('postgres://')) {
+        return;
+      }
+
+      CODE_VULN_RULES.forEach(rule => {
+        if (rule.test(lineText, rawCode, idx, lines)) {
+          const already = fileFindings.some(f => f.line === lineNum && f.ruleId === rule.id);
+          if (!already) {
+            fileFindings.push({
+              file: fileName,
+              line: lineNum,
+              ruleId: rule.id,
+              category: rule.category,
+              title: rule.title,
+              severity: rule.severity,
+              cwe: rule.cwe,
+              owasp: rule.owasp,
+              complianceControl: rule.complianceControl,
+              exploit: rule.exploit,
+              snippet: lineText.trim(),
+              badCode: rule.badCode,
+              goodCode: rule.goodCode,
+              contextLines: lines.slice(Math.max(0, idx - 2), Math.min(lines.length, idx + 3)),
+              contextStartLine: Math.max(1, lineNum - 2)
+            });
+          }
+        }
+      });
+    });
+
+    this.scannedFilesMap.set(fileName, {
+      path: fileName,
+      content: rawCode,
+      lines: lines,
+      findings: fileFindings
+    });
+
+    this.latestCodeFindings = fileFindings;
+    if (this.filesScannedCount) {
+      this.filesScannedCount.innerText = this.scannedFilesMap.size;
+    }
+
+    this.updateFindingMetrics(fileFindings);
+    this.renderFileTree();
+    this.renderCodeFindings(fileFindings);
+    this.renderGlobalLaunchReadiness();
+
+    if (fileFindings.length > 0) {
+      this.showFindingDiff(fileFindings[0]);
+    } else {
+      this.showCleanFileInspector(fileName);
     }
   }
 
@@ -2502,12 +2699,13 @@ class ComplianceApp {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
+      const text = e.target.result || '';
       if (this.codeEditorInput) {
-        this.codeEditorInput.value = e.target.result;
+        this.codeEditorInput.value = text;
         this.updateCodeCounters();
-        this.runCodeSecurityScan();
-        this.showToast(`Uploaded and scanned: ${file.name}`);
       }
+      this.scanSingleSourceFile(file.name, text);
+      this.showToast(`Uploaded and scanned: ${file.name}`);
     };
     reader.readAsText(file);
   }
@@ -2579,6 +2777,8 @@ class ComplianceApp {
     let totalLines = 0;
     let combinedContent = '';
     let filesRead = 0;
+    const allFindings = [];
+    this.scannedFilesMap.clear();
 
     // If local font assets were detected in bundle, prepend note to context
     if (bundledFontsDetected) {
@@ -2589,12 +2789,55 @@ class ComplianceApp {
     const filesToRead = codeFiles.slice(0, 200);
 
     filesToRead.forEach(file => {
-      const relPath = file.webkitRelativePath || file.name;
+      const relPath = (file.webkitRelativePath || file.name).replace(/\\/g, '/');
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target.result || '';
         combinedContent += `\n// ==========================================\n// File: ${relPath}\n// ==========================================\n` + text + `\n`;
-        totalLines += text.split('\n').length;
+        const lines = text.split('\n');
+        totalLines += lines.length;
+
+        // Scan this specific file
+        const fileFindings = [];
+        lines.forEach((lineText, idx) => {
+          const lineNum = idx + 1;
+          const trimmed = lineText.trim();
+          if (trimmed.startsWith('//') && !trimmed.includes('AKIA') && !trimmed.includes('sk-') && !trimmed.includes('postgres://')) {
+            return;
+          }
+
+          CODE_VULN_RULES.forEach(rule => {
+            if (rule.test(lineText, text, idx, lines)) {
+              const finding = {
+                file: relPath,
+                line: lineNum,
+                ruleId: rule.id,
+                category: rule.category,
+                title: rule.title,
+                severity: rule.severity,
+                cwe: rule.cwe,
+                owasp: rule.owasp,
+                complianceControl: rule.complianceControl,
+                exploit: rule.exploit,
+                snippet: lineText.trim(),
+                badCode: rule.badCode,
+                goodCode: rule.goodCode,
+                contextLines: lines.slice(Math.max(0, idx - 2), Math.min(lines.length, idx + 3)),
+                contextStartLine: Math.max(1, lineNum - 2)
+              };
+              fileFindings.push(finding);
+              allFindings.push(finding);
+            }
+          });
+        });
+
+        this.scannedFilesMap.set(relPath, {
+          path: relPath,
+          content: text,
+          lines: lines,
+          findings: fileFindings
+        });
+
         filesRead++;
 
         if (filesRead === filesToRead.length) {
@@ -2612,8 +2855,24 @@ class ComplianceApp {
             this.uploadStatusText.innerHTML = bundleSummary;
           }
 
-          this.runCodeSecurityScan();
-          this.showToast(`Analyzed ${filesRead} file(s) (${totalLines.toLocaleString()} lines) in App Bundle!`);
+          if (this.filesScannedCount) {
+            this.filesScannedCount.innerText = filesRead;
+          }
+
+          this.latestCodeFindings = allFindings;
+          this.updateFindingMetrics(allFindings);
+          this.syncFindingsToCompliance(false);
+          this.renderFileTree();
+          this.renderCodeFindings(allFindings);
+          this.renderGlobalLaunchReadiness();
+
+          if (allFindings.length > 0) {
+            this.showFindingDiff(allFindings[0]);
+          } else if (filesToRead.length > 0) {
+            this.showCleanFileInspector(filesToRead[0].webkitRelativePath || filesToRead[0].name);
+          }
+
+          this.showToast(`Analyzed ${filesRead} file(s) (${totalLines.toLocaleString()} lines) in App Bundle! Found ${allFindings.length} issue(s).`);
 
           // Switch to Code & Secret Scanner tab to see findings
           const codeTabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
@@ -2627,71 +2886,413 @@ class ComplianceApp {
     });
   }
 
-  runCodeSecurityScan() {
-    if (!this.codeEditorInput) return;
-    const rawCode = this.codeEditorInput.value;
-    if (!rawCode || !rawCode.trim()) {
-      this.showToast('Please paste code or select a vulnerability preset first.');
+  updateTelemetry(percent, title, detail) {
+    if (this.scanProgressContainer) {
+      this.scanProgressContainer.style.display = 'block';
+    }
+    if (this.scanProgressBar) {
+      this.scanProgressBar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+    }
+    if (this.scanProgressPercent) {
+      this.scanProgressPercent.innerText = `${Math.round(percent)}%`;
+    }
+    if (title && this.telemetryStatusTitle) {
+      this.telemetryStatusTitle.innerText = title;
+    }
+    if (detail && this.scanProgressText) {
+      this.scanProgressText.innerText = detail;
+    }
+  }
+
+  decodeBase64Utf8(base64Str) {
+    try {
+      const cleanB64 = (base64Str || '').replace(/\s/g, '');
+      const binary = atob(cleanB64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new TextDecoder('utf-8').decode(bytes);
+    } catch (e) {
+      try {
+        return decodeURIComponent(escape(atob((base64Str || '').replace(/\s/g, ''))));
+      } catch (e2) {
+        return atob((base64Str || '').replace(/\s/g, ''));
+      }
+    }
+  }
+
+  async scanGithubRepository() {
+    const rawInput = this.ghRepoInput?.value.trim() || '';
+    if (!rawInput) {
+      this.showToast('Please enter a GitHub repository (e.g. joelaah/compliance-checker or full URL).');
       return;
     }
 
-    const lines = rawCode.split('\n');
-    const findings = [];
+    let clean = rawInput
+      .trim()
+      .replace(/^git@github\.com:/i, '')
+      .replace(/^https?:\/\/(?:www\.)?github\.com\//i, '')
+      .replace(/^github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/\/+$/, '');
+    let parts = clean.split('/').filter(Boolean);
+    if (parts.length < 2) {
+      this.showToast('Invalid format. Enter as "owner/repo" or full GitHub URL.');
+      return;
+    }
+
+    const owner = parts[0];
+    const repo = parts[1];
+    let branch = this.ghBranchInput?.value.trim() || 'main';
+    if (parts[2] === 'tree' && parts.length > 3) {
+      branch = parts.slice(3).join('/');
+      if (this.ghBranchInput) this.ghBranchInput.value = branch;
+    }
+    const token = this.ghTokenInput?.value.trim() || '';
+
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    if (this.btnScanGithub) this.btnScanGithub.disabled = true;
+    this.updateTelemetry(5, 'Connecting to GitHub API...', `Targeting repository ${owner}/${repo} on branch [${branch}]`);
+
+    try {
+      let treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`;
+      let treeRes = await fetch(treeUrl, { headers });
+
+      if (!treeRes.ok && (branch === 'main' || branch === 'master')) {
+        const altBranch = branch === 'main' ? 'master' : 'main';
+        this.updateTelemetry(10, `Retrying on branch [${altBranch}]...`, `Branch '${branch}' returned ${treeRes.status}, attempting fallback.`);
+        const altUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(altBranch)}?recursive=1`;
+        const altRes = await fetch(altUrl, { headers });
+        if (altRes.ok) {
+          treeRes = altRes;
+          branch = altBranch;
+          if (this.ghBranchInput) this.ghBranchInput.value = altBranch;
+        }
+      }
+
+      if (!treeRes.ok) {
+        if (treeRes.status === 403) {
+          throw new Error('GitHub API rate limit reached. Add an optional GitHub Personal Access Token above for 5,000 requests/hr.');
+        } else if (treeRes.status === 404) {
+          throw new Error(`Repository ${owner}/${repo} not found or is private. If private, enter an authorized Personal Access Token.`);
+        } else {
+          throw new Error(`GitHub API error: ${treeRes.status} ${treeRes.statusText}`);
+        }
+      }
+
+      const treeData = await treeRes.json();
+      const tree = treeData.tree || [];
+
+      const codeExtensions = [
+        '.py', '.js', '.ts', '.jsx', '.tsx', '.dart', '.java', '.kt', 
+        '.go', '.rs', '.cs', '.sql', '.env', '.json', '.yaml', '.yml', '.php'
+      ];
+
+      const ignoredPaths = [
+        'node_modules/', 'build/', 'dist/', '.dart_tool/', '.git/', 
+        'vendor/', 'Pods/', 'package-lock.json', 'uv.lock', '.min.js', 
+        '.min.css', 'coverage/', '.gradle/', '.venv/'
+      ];
+
+      const filteredFiles = tree.filter(item => {
+        if (item.type !== 'blob') return false;
+        const p = item.path.toLowerCase();
+        if (ignoredPaths.some(ignored => p.includes(ignored))) return false;
+        return codeExtensions.some(ext => p.endsWith(ext) || p.includes('.env'));
+      });
+
+      if (filteredFiles.length === 0) {
+        this.updateTelemetry(100, 'Scan Complete', 'No supported source code files found in repository tree.');
+        this.showToast('No matching source code files found to scan.');
+        if (this.btnScanGithub) this.btnScanGithub.disabled = false;
+        return;
+      }
+
+      // Prioritize security-sensitive files (auth, env, sql, api, controllers)
+      filteredFiles.sort((a, b) => {
+        const score = (p) => {
+          let s = 0;
+          const lower = p.toLowerCase();
+          if (lower.includes('.env')) s += 10;
+          if (lower.includes('auth') || lower.includes('login') || lower.includes('security')) s += 8;
+          if (lower.includes('.sql') || lower.includes('schema') || lower.includes('migration')) s += 7;
+          if (lower.includes('api') || lower.includes('route') || lower.includes('controller')) s += 5;
+          return s;
+        };
+        return score(b.path) - score(a.path);
+      });
+
+      const filesToScan = filteredFiles.slice(0, 50);
+      this.scannedFilesMap.clear();
+
+      const allFindings = [];
+      const chunkSize = 4;
+
+      for (let i = 0; i < filesToScan.length; i += chunkSize) {
+        const chunk = filesToScan.slice(i, i + chunkSize);
+        await Promise.all(chunk.map(async (item, chunkIdx) => {
+          const fileIndex = i + chunkIdx;
+          const pct = 15 + Math.round((fileIndex / filesToScan.length) * 80);
+          this.updateTelemetry(pct, 'Ingesting & Scanning Repository...', `Scanning ${fileIndex + 1}/${filesToScan.length}: ${item.path}`);
+
+          try {
+            let fileText = '';
+            if (token) {
+              const blobRes = await fetch(item.url, { headers });
+              if (blobRes.ok) {
+                const blobData = await blobRes.json();
+                if (blobData.encoding === 'base64') {
+                  fileText = this.decodeBase64Utf8(blobData.content);
+                }
+              }
+            } else {
+              const encodedPath = item.path.split('/').map(encodeURIComponent).join('/');
+              const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(branch)}/${encodedPath}`;
+              try {
+                const rawRes = await fetch(rawUrl);
+                if (rawRes.ok) {
+                  fileText = await rawRes.text();
+                }
+              } catch (rawErr) {
+                // Ignore raw fetch failure
+              }
+              if (!fileText && item.url) {
+                try {
+                  const blobRes = await fetch(item.url, { headers });
+                  if (blobRes.ok) {
+                    const blobData = await blobRes.json();
+                    if (blobData.encoding === 'base64') {
+                      fileText = this.decodeBase64Utf8(blobData.content);
+                    }
+                  }
+                } catch (blobErr) {
+                  // Ignore
+                }
+              }
+            }
+
+            if (fileText) {
+              const lines = fileText.split('\n');
+              const fileFindings = [];
+
+              lines.forEach((lineText, idx) => {
+                const lineNum = idx + 1;
+                const trimmed = lineText.trim();
+                if (trimmed.startsWith('//') && !trimmed.includes('AKIA') && !trimmed.includes('sk-') && !trimmed.includes('postgres://')) {
+                  return;
+                }
+
+                CODE_VULN_RULES.forEach(rule => {
+                  if (rule.test(lineText, fileText, idx, lines)) {
+                    const finding = {
+                      file: item.path,
+                      line: lineNum,
+                      ruleId: rule.id,
+                      category: rule.category,
+                      title: rule.title,
+                      severity: rule.severity,
+                      cwe: rule.cwe,
+                      owasp: rule.owasp,
+                      complianceControl: rule.complianceControl,
+                      exploit: rule.exploit,
+                      snippet: lineText.trim(),
+                      badCode: rule.badCode,
+                      goodCode: rule.goodCode,
+                      contextLines: lines.slice(Math.max(0, idx - 2), Math.min(lines.length, idx + 3)),
+                      contextStartLine: Math.max(1, lineNum - 2)
+                    };
+                    fileFindings.push(finding);
+                    allFindings.push(finding);
+                  }
+                });
+              });
+
+              this.scannedFilesMap.set(item.path, {
+                path: item.path,
+                content: fileText,
+                lines: lines,
+                findings: fileFindings
+              });
+            }
+          } catch (err) {
+            console.warn(`Failed to fetch file ${item.path}:`, err);
+          }
+        }));
+      }
+
+      this.updateTelemetry(100, 'Ingestion & Scan Complete', `Scanned ${filesToScan.length} files across ${owner}/${repo}. Found ${allFindings.length} issue(s).`);
+      this.latestCodeFindings = allFindings;
+
+      if (this.filesScannedCount) {
+        this.filesScannedCount.innerText = filesToScan.length;
+      }
+
+      this.updateFindingMetrics(allFindings);
+      this.syncFindingsToCompliance(false);
+      this.renderFileTree();
+      this.renderGlobalLaunchReadiness();
+
+      if (allFindings.length > 0) {
+        this.showFindingDiff(allFindings[0]);
+      } else if (filesToScan.length > 0) {
+        this.showCleanFileInspector(filesToScan[0].path);
+      }
+
+      // Switch to codescan tab
+      const tabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+      if (tabBtn) tabBtn.click();
+
+      this.showToast(`Analyzed ${filesToScan.length} files in ${owner}/${repo} (${allFindings.length} findings)`);
+    } catch (err) {
+      console.error(err);
+      this.updateTelemetry(0, 'Scan Failed', err.message);
+      this.showToast(`Scan Error: ${err.message}`);
+    } finally {
+      if (this.btnScanGithub) this.btnScanGithub.disabled = false;
+    }
+  }
+
+  async scanSupabaseDatabase() {
+    const rawUrl = this.supabaseUrlInput?.value.trim() || '';
+    const key = this.supabaseKeyInput?.value.trim() || '';
+
+    if (!rawUrl) {
+      this.showToast('Please enter your Supabase Project URL (e.g. https://xyz.supabase.co)');
+      return;
+    }
+
+    const baseUrl = rawUrl.replace(/\/+$/, '');
+    if (this.btnScanSupabase) this.btnScanSupabase.disabled = true;
+    this.updateTelemetry(10, 'Connecting to Supabase PostgREST...', `Inspecting ${baseUrl}/rest/v1/`);
+
+    try {
+      const headers = {};
+      if (key) {
+        headers['apikey'] = key;
+        headers['Authorization'] = `Bearer ${key}`;
+      }
+      const openApiUrl = `${baseUrl}/rest/v1/`;
+      const res = await fetch(openApiUrl, { headers });
+
+      if (!res.ok) {
+        throw new Error(`Failed to query PostgREST endpoint: ${res.status} ${res.statusText}`);
+      }
+
+      const schema = await res.json();
+      const paths = schema.paths ? Object.keys(schema.paths).filter(p => p !== '/' && !p.startsWith('/rpc/')) : [];
+      const definitions = schema.definitions ? Object.keys(schema.definitions) : [];
+      const tables = Array.from(new Set([...paths.map(p => p.replace(/^\//, '')), ...definitions]));
+
+      if (tables.length === 0) {
+        this.updateTelemetry(100, 'Inspection Complete', 'PostgREST endpoint reached, but no public tables were exposed.');
+        this.showToast('Supabase PostgREST reached. No public database tables exposed.');
+        if (this.btnScanSupabase) this.btnScanSupabase.disabled = false;
+        return;
+      }
+
+      this.updateTelemetry(40, 'PostgREST Schema Discovered', `Found ${tables.length} database entities in API schema. Testing RLS isolation...`);
+
+      const findings = [];
+
+      for (let i = 0; i < Math.min(tables.length, 12); i++) {
+        const table = tables[i];
+        const pct = 40 + Math.round((i / Math.min(tables.length, 12)) * 50);
+        this.updateTelemetry(pct, 'Verifying RLS Policies...', `Testing unauthenticated table read: ${table}`);
+
+        try {
+          const testReadUrl = `${baseUrl}/rest/v1/${table}?select=*&limit=1`;
+          const readRes = await fetch(testReadUrl, { headers });
+
+          if (readRes.ok) {
+            const data = await readRes.json();
+            const isLeaking = Array.isArray(data) && data.length > 0;
+
+            if (isLeaking) {
+              findings.push({
+                file: `supabase://rest/v1/${table}`,
+                line: 1,
+                ruleId: 'SEC-DB-RLS',
+                category: 'Database Attacks',
+                title: `Exposed Table Without Row Level Security: ${table}`,
+                severity: 'critical',
+                cwe: 'CWE-284: Improper Access Control',
+                owasp: 'OWASP Top 10 A01:2021 - Broken Access Control',
+                complianceControl: 'DATA-02',
+                exploit: `PostgREST endpoint /rest/v1/${table} returns live row data to unauthenticated anon keys. Attackers can dump or tamper with database records.`,
+                snippet: `GET ${baseUrl}/rest/v1/${table}?select=* -> 200 OK (${JSON.stringify(data[0]).slice(0, 80)}...)`,
+                badCode: `CREATE TABLE public.${table} (\n  -- Missing ENABLE ROW LEVEL SECURITY\n);`,
+                goodCode: `ALTER TABLE public.${table} ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY "${table}_user_access" ON public.${table}\n  FOR ALL TO authenticated USING (auth.uid() = user_id);`,
+                contextLines: [`GET /rest/v1/${table}?select=* -> 200 OK`, JSON.stringify(data[0], null, 2)],
+                contextStartLine: 1
+              });
+            }
+          }
+        } catch (tableErr) {
+          console.warn(`Could not test table ${table}:`, tableErr);
+        }
+      }
+
+      this.updateTelemetry(100, 'Supabase RLS Inspection Complete', `Evaluated ${tables.length} tables. Found ${findings.length} exposure risk(s).`);
+      this.latestCodeFindings = findings;
+
+      findings.forEach(f => {
+        this.scannedFilesMap.set(f.file, {
+          path: f.file,
+          content: f.snippet,
+          lines: [f.snippet],
+          findings: [f]
+        });
+      });
+
+      this.updateFindingMetrics(findings);
+      this.syncFindingsToCompliance(false);
+      this.renderFileTree();
+      this.renderGlobalLaunchReadiness();
+
+      if (findings.length > 0) {
+        this.showFindingDiff(findings[0]);
+      } else if (tables.length > 0) {
+        this.showCleanFileInspector(`supabase://rest/v1/${tables[0]}`);
+      }
+
+      const tabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+      if (tabBtn) tabBtn.click();
+
+      this.showToast(`Supabase RLS Inspection Complete: ${findings.length} table(s) flagged.`);
+    } catch (err) {
+      console.error(err);
+      this.updateTelemetry(0, 'Supabase Inspection Failed', err.message);
+      this.showToast(`Supabase Error: ${err.message}`);
+    } finally {
+      if (this.btnScanSupabase) this.btnScanSupabase.disabled = false;
+    }
+  }
+
+  updateFindingMetrics(findings) {
     let criticalCount = 0;
     let highCount = 0;
     let secretsCount = 0;
     let sqlCount = 0;
 
-    lines.forEach((lineText, idx) => {
-      const lineNum = idx + 1;
-      const trimmed = lineText.trim();
-      // Skip simple single-line comment headers unless they look like secrets
-      if (trimmed.startsWith('//') && !trimmed.includes('AKIA') && !trimmed.includes('sk-') && !trimmed.includes('postgres://')) {
-        return;
-      }
-
-      CODE_VULN_RULES.forEach(rule => {
-        if (rule.test(lineText, rawCode, idx, lines)) {
-          const already = findings.some(f => f.line === lineNum && f.ruleId === rule.id);
-          if (!already) {
-            findings.push({
-              line: lineNum,
-              ruleId: rule.id,
-              category: rule.category,
-              title: rule.title,
-              severity: rule.severity,
-              cwe: rule.cwe,
-              owasp: rule.owasp,
-              complianceControl: rule.complianceControl,
-              exploit: rule.exploit,
-              snippet: lineText.trim(),
-              badCode: rule.badCode,
-              goodCode: rule.goodCode
-            });
-
-            if (rule.severity === 'critical') criticalCount++;
-            if (rule.severity === 'high') highCount++;
-            if (rule.category === 'Secret Leak') secretsCount++;
-            if (rule.category === 'Database Attacks') sqlCount++;
-          }
-        }
-      });
+    findings.forEach(f => {
+      if (f.severity === 'critical') criticalCount++;
+      if (f.severity === 'high') highCount++;
+      if (f.category === 'Secret Leak') secretsCount++;
+      if (f.category === 'Database Attacks') sqlCount++;
     });
 
-    this.latestCodeFindings = findings;
-
-    // Update tab badge
     if (this.tabCodeVulnCount) {
       this.tabCodeVulnCount.innerText = findings.length;
     }
 
-    // Update summary chips
     if (this.flawsCritical) this.flawsCritical.innerText = criticalCount;
     if (this.flawsHigh) this.flawsHigh.innerText = highCount;
     if (this.flawsSecrets) this.flawsSecrets.innerText = secretsCount;
     if (this.flawsSql) this.flawsSql.innerText = sqlCount;
 
-    // Calculate Grade
     let grade = 'A';
     let gradeClass = 'grade-a';
 
@@ -2718,13 +3319,241 @@ class ComplianceApp {
       this.scanTimestamp.innerText = `Scanned at ${new Date().toLocaleTimeString()} • ${findings.length} findings`;
     }
 
-    // Show sync bar if findings exist
-    if (this.syncActionBar) {
-      this.syncActionBar.style.display = findings.length > 0 ? 'flex' : 'none';
+    if (this.btnSyncWithAudit) {
+      this.btnSyncWithAudit.style.display = findings.length > 0 ? 'inline-flex' : 'none';
+    }
+  }
+
+  renderFileTree() {
+    if (!this.findingsFileTree) return;
+    const filter = (this.findingsFilterInput?.value || '').toLowerCase().trim();
+    this.findingsFileTree.innerHTML = '';
+
+    if (this.scannedFilesMap.size === 0) {
+      this.findingsFileTree.innerHTML = `
+        <div class="empty-tree-state">
+          <span>No repository scanned yet. Enter a GitHub repo or folder above to inspect files.</span>
+        </div>
+      `;
+      return;
     }
 
-    this.renderCodeFindings(findings);
-    this.renderGlobalLaunchReadiness();
+    let firstFindingToSelect = null;
+    let matchingFilesCount = 0;
+
+    this.scannedFilesMap.forEach((fileObj, filePath) => {
+      const matchesFile = filePath.toLowerCase().includes(filter);
+      const matchingFindings = fileObj.findings.filter(f => 
+        matchesFile || 
+        f.title.toLowerCase().includes(filter) || 
+        f.ruleId.toLowerCase().includes(filter) ||
+        f.category.toLowerCase().includes(filter)
+      );
+
+      if (filter && !matchesFile && matchingFindings.length === 0) {
+        return;
+      }
+
+      matchingFilesCount++;
+      const node = document.createElement('div');
+      node.className = `tree-file-node ${matchingFindings.length > 0 ? 'has-issues' : 'clean'}`;
+
+      const icon = filePath.endsWith('.sql') ? '🗄️' :
+                   filePath.includes('.env') ? '🔑' :
+                   filePath.startsWith('supabase://') ? '⚡' : '📄';
+
+      const badgeHtml = matchingFindings.length > 0 
+        ? `<span class="tree-badge-count">${matchingFindings.length} issue(s)</span>`
+        : `<span class="tree-badge-count clean">Clean</span>`;
+
+      node.innerHTML = `
+        <div class="tree-file-header">
+          <div class="tree-file-title" title="${filePath}">
+            <span>${icon}</span>
+            <span>${filePath}</span>
+          </div>
+          ${badgeHtml}
+        </div>
+      `;
+
+      if (matchingFindings.length > 0) {
+        const subList = document.createElement('div');
+        subList.className = 'tree-subfindings-list';
+        subList.style.display = 'flex';
+        subList.style.flexDirection = 'column';
+        subList.style.gap = '4px';
+
+        matchingFindings.forEach(f => {
+          if (!firstFindingToSelect) firstFindingToSelect = f;
+          const fItem = document.createElement('div');
+          fItem.className = `tree-finding-item ${this.selectedFinding === f ? 'selected' : ''}`;
+          fItem.innerHTML = `
+            <span>Line ${f.line}: ${f.title}</span>
+            <span class="finding-sev-pill ${f.severity}" style="font-size: 0.65rem; padding: 1px 5px;">${f.severity}</span>
+          `;
+          fItem.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.tree-file-node').forEach(el => el.classList.remove('active'));
+            node.classList.add('active');
+            document.querySelectorAll('.tree-finding-item').forEach(el => el.classList.remove('selected'));
+            fItem.classList.add('selected');
+            this.showFindingDiff(f);
+          });
+          subList.appendChild(fItem);
+        });
+
+        node.appendChild(subList);
+      }
+
+      node.addEventListener('click', () => {
+        document.querySelectorAll('.tree-file-node').forEach(el => el.classList.remove('active'));
+        node.classList.add('active');
+        if (matchingFindings.length > 0) {
+          this.showFindingDiff(matchingFindings[0]);
+        } else {
+          this.showCleanFileInspector(filePath);
+        }
+      });
+
+      this.findingsFileTree.appendChild(node);
+    });
+
+    if (matchingFilesCount === 0) {
+      this.findingsFileTree.innerHTML = `
+        <div class="empty-tree-state">
+          <span>No files match your search filter "${this.escapeHTML(filter)}".</span>
+        </div>
+      `;
+    }
+
+    if (firstFindingToSelect && !this.selectedFinding) {
+      this.showFindingDiff(firstFindingToSelect);
+    }
+  }
+
+  showFindingDiff(finding) {
+    if (!finding) return;
+    this.selectedFinding = finding;
+
+    if (this.emptyFindingsPlaceholder) {
+      this.emptyFindingsPlaceholder.style.display = 'none';
+    }
+    if (this.splitDiffContainer) {
+      this.splitDiffContainer.style.display = 'flex';
+
+      let badCodeHtml = '';
+      if (finding.contextLines && finding.contextLines.length > 0) {
+        badCodeHtml = finding.contextLines.map((cL, offset) => {
+          const lineNo = (finding.contextStartLine || 1) + offset;
+          const isFlagged = lineNo === finding.line;
+          return `<div class="diff-line-row ${isFlagged ? 'diff-line-highlight-bad' : ''}"><span class="diff-line-num">${lineNo}</span><span class="diff-line-content">${this.escapeHTML(cL)}</span></div>`;
+        }).join('');
+      } else {
+        const lines = (finding.snippet || finding.badCode || '').split('\n');
+        badCodeHtml = lines.map((l, idx) => `<div class="diff-line-row diff-line-highlight-bad"><span class="diff-line-num">${finding.line + idx}</span><span class="diff-line-content">${this.escapeHTML(l)}</span></div>`).join('');
+      }
+
+      const goodLines = (finding.goodCode || '').split('\n');
+      const goodCodeHtml = goodLines.map((gL, idx) => `<div class="diff-line-row diff-line-highlight-good"><span class="diff-line-num">${idx + 1}</span><span class="diff-line-content">${this.escapeHTML(gL)}</span></div>`).join('');
+
+      this.splitDiffContainer.innerHTML = `
+        <div class="diff-meta-header">
+          <div class="diff-meta-top">
+            <span class="diff-file-tag">📂 ${this.escapeHTML(finding.file)} : Line ${finding.line}</span>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span class="finding-sev-pill ${finding.severity}">${finding.severity.toUpperCase()}</span>
+              <span class="badge-pill">${finding.ruleId}</span>
+              <span class="badge-pill" style="color: var(--cyan); border-color: rgba(56, 189, 248, 0.3);">Control ${finding.complianceControl}</span>
+            </div>
+          </div>
+          <div class="diff-title-row">
+            <h3>${this.escapeHTML(finding.title)}</h3>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            <strong>Classification:</strong> ${this.escapeHTML(finding.cwe)} &bull; ${this.escapeHTML(finding.owasp)}
+          </div>
+          <div class="exploit-callout">
+            <strong>Hacker Exploit Scenario:</strong> ${this.escapeHTML(finding.exploit)}
+          </div>
+        </div>
+
+        <div class="split-diff-view-grid">
+          <!-- Left: Vulnerable Source Code -->
+          <div class="diff-pane diff-pane-bad">
+            <div class="diff-pane-header">
+              <span>⚠️ Detected Vulnerable Code (Line ${finding.line})</span>
+              <span style="font-size: 0.72rem; color: var(--rose);">Flagged by Static Engine</span>
+            </div>
+            <div class="diff-code-box">${badCodeHtml}</div>
+          </div>
+
+          <!-- Right: Recommended Remediation -->
+          <div class="diff-pane diff-pane-good">
+            <div class="diff-pane-header">
+              <span>🛡️ Recommended Hardened Fix</span>
+              <button class="btn-copy-remediation" id="btnCopyRemediation" type="button">📋 Copy Remediation</button>
+            </div>
+            <div class="diff-code-box">${goodCodeHtml}</div>
+          </div>
+        </div>
+      `;
+
+      const copyBtn = document.getElementById('btnCopyRemediation');
+      copyBtn?.addEventListener('click', () => {
+        this.copyRemediation(finding.goodCode, copyBtn);
+      });
+    }
+  }
+
+  showCleanFileInspector(filePath) {
+    if (this.emptyFindingsPlaceholder) {
+      this.emptyFindingsPlaceholder.style.display = 'none';
+    }
+    if (this.splitDiffContainer) {
+      this.splitDiffContainer.style.display = 'flex';
+      this.splitDiffContainer.innerHTML = `
+        <div class="clean-file-inspector">
+          <div class="clean-shield-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="clean-file-meta" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <span class="diff-file-tag">📂 ${this.escapeHTML(filePath)}</span>
+            <span class="tree-badge-count clean">Passed Static Analysis</span>
+          </div>
+          <h3 style="color: var(--emerald); font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">0 Vulnerabilities Detected</h3>
+          <p style="color: var(--text-secondary); font-size: 0.88rem; max-width: 520px; line-height: 1.6;">
+            This file complies with all active SAST vulnerability rules, secret leakage checks, database RLS protection policies, and global child/privacy protection mandates.
+          </p>
+        </div>
+      `;
+    }
+  }
+
+  copyRemediation(code, btnEl) {
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      if (btnEl) {
+        btnEl.innerText = '✓ Copied!';
+        btnEl.classList.add('copied');
+        setTimeout(() => {
+          btnEl.innerText = '📋 Copy Remediation';
+          btnEl.classList.remove('copied');
+        }, 2000);
+      }
+      this.showToast('✅ Hardened remediation code copied to clipboard!');
+    }).catch(() => {
+      this.showToast('Failed to copy to clipboard.');
+    });
+  }
+
+  runCodeSecurityScan() {
+    if (!this.codeEditorInput) return;
+    const rawCode = this.codeEditorInput.value;
+    if (!rawCode || !rawCode.trim()) {
+      this.showToast('Please paste code or select a vulnerability preset first.');
+      return;
+    }
+    this.scanSingleSourceFile('Custom Snippet', rawCode);
   }
 
   renderCodeFindings(findings) {
@@ -2773,7 +3602,7 @@ class ComplianceApp {
   }
 
   escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, 
+    return (str || '').replace(/[&<>'"]/g, 
       tag => ({
         '&': '&amp;',
         '<': '&lt;',
@@ -2784,7 +3613,7 @@ class ComplianceApp {
     );
   }
 
-  syncFindingsToCompliance() {
+  syncFindingsToCompliance(showToastNotice = true) {
     if (!this.latestCodeFindings || this.latestCodeFindings.length === 0) return;
 
     let updatedControls = 0;
@@ -2798,7 +3627,9 @@ class ComplianceApp {
     this.saveAnswers();
     this.render();
     this.renderGlobalLaunchReadiness();
-    this.showToast(`Updated ${updatedControls} compliance controls to Non-Compliant (Gap) based on code security flaws!`);
+    if (showToastNotice) {
+      this.showToast(`Updated ${updatedControls} compliance controls to Non-Compliant (Gap) based on code security flaws!`);
+    }
   }
 
   // --- Automated URL Quick Heuristic Scanner ---

@@ -40,10 +40,6 @@
           </select>
         </div>
 
-        <button id="btnUserGuide" class="btn btn-secondary btn-icon" title="How to Use This App">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span class="btn-text">Guide</span>
-        </button>
 
         <button id="btnExportReport" class="btn btn-secondary btn-icon" title="Export Audit Report">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -60,17 +56,17 @@
     <!-- Main Content Area -->
     <main class="main-container">
       
-      <!-- Hero Quick Scanner & Scope Configurator -->
+      <!-- Hero: Connect Repository & Infrastructure Command Center -->
       <section class="hero-section glass-panel">
         <div class="hero-header">
           <div class="hero-copy">
             <div class="live-pulse-badge">
               <span class="pulse-dot"></span>
-              <span>Multi-Framework Compliance Engine v3.4</span>
+              <span>Enterprise DevSecOps & Compliance Scanner v4.0</span>
             </div>
-            <h1 class="hero-title">Evaluate App Compliance in Minutes</h1>
+            <h1 class="hero-title">Connect Repository & Infrastructure</h1>
             <p class="hero-subtitle">
-              Verify your web application against <strong>SOC 2 Type II</strong>, <strong>ISO 27001</strong>, <strong>HIPAA</strong>, <strong>GDPR</strong>, and <strong>PCI-DSS</strong> controls. Identify critical security gaps before certification audits.
+              Scan public or private GitHub repositories, Supabase databases, and local codebases for security vulnerabilities, compliance blockers, and RLS leaks in real-time. Zero cloud upload — evaluated 100% in-browser.
             </p>
           </div>
           <div class="hero-stat-card">
@@ -101,25 +97,99 @@
           </div>
         </div>
 
-        <!-- Scanner Input Mode Tabs -->
+        <!-- Scanner Mode Tabs -->
         <div class="scanner-mode-tabs">
-          <button class="scanner-mode-btn active" id="btnModeUpload" data-mode="upload" type="button">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; max-width: 18px; max-height: 18px; flex-shrink: 0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span>Upload Codebase & Files (.js, .py, .env, .sql, mobile)</span>
+          <button class="scanner-mode-btn active" id="btnModeGithub" data-mode="github" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            <span>GitHub Repository</span>
+          </button>
+          <button class="scanner-mode-btn" id="btnModeSupabase" data-mode="supabase" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            <span>Supabase & Database RLS</span>
+          </button>
+          <button class="scanner-mode-btn" id="btnModeUpload" data-mode="upload" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Local Codebase & Bundles</span>
           </button>
           <button class="scanner-mode-btn" id="btnModeUrl" data-mode="url" type="button">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; max-width: 18px; max-height: 18px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             <span>Web Endpoint Scan</span>
           </button>
         </div>
 
-        <!-- Mode 1: Codebase & File Upload (Active) -->
-        <div class="scanner-panel-mode" id="panelModeUpload">
+        <!-- Mode 1: GitHub Repository Scanner (Default Active) -->
+        <div class="scanner-panel-mode" id="panelModeGithub">
+          <div class="command-center-bar">
+            <div class="input-group flex-3">
+              <label for="ghRepoInput">Target GitHub Repository</label>
+              <div class="input-prefix-wrapper">
+                <span class="input-prefix">github.com/</span>
+                <input type="text" id="ghRepoInput" placeholder="owner/repo or full URL" value="joelaah/compliance-checker">
+              </div>
+            </div>
+            <div class="input-group flex-1" style="max-width: 130px;">
+              <label for="ghBranchInput">Branch</label>
+              <input type="text" id="ghBranchInput" placeholder="main" value="main">
+            </div>
+            <div class="input-group flex-2">
+              <label for="ghTokenInput">Personal Access Token <span class="label-opt">(Optional)</span></label>
+              <input type="password" id="ghTokenInput" placeholder="ghp_... (For private repos / 5k rate limit)">
+            </div>
+            <div class="input-action">
+              <button id="btnScanGithub" class="btn btn-primary btn-glow" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>Authorize & Scan</span>
+              </button>
+            </div>
+          </div>
+          <div class="command-center-meta">
+            <div class="meta-pills-row">
+              <span class="badge-pill">🔒 100% In-Browser REST API Client</span>
+              <span class="badge-pill">⚡ Zero Server Storage</span>
+              <span class="badge-pill">📁 Auto-Filters .py, .js, .ts, .dart, .sql, .env</span>
+              <span class="badge-pill">🌍 195 Country Readiness Check</span>
+            </div>
+            <div class="meta-shortcuts-row">
+              <button type="button" class="preset-link-btn" id="btnSampleRepoJoe">⚡ Current repo: joelaah/compliance-checker</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode 2: Supabase PostgREST & Database RLS Inspector -->
+        <div class="scanner-panel-mode" id="panelModeSupabase" style="display: none;">
+          <div class="command-center-bar">
+            <div class="input-group flex-3">
+              <label for="supabaseUrlInput">Supabase Project URL</label>
+              <input type="text" id="supabaseUrlInput" placeholder="https://your-project.supabase.co">
+            </div>
+            <div class="input-group flex-2">
+              <label for="supabaseKeyInput">Anon / Public Key (or Service Key)</label>
+              <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOi...">
+            </div>
+            <div class="input-action">
+              <button id="btnScanSupabase" class="btn btn-primary btn-glow" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Inspect PostgREST & RLS</span>
+              </button>
+            </div>
+          </div>
+          <div class="command-center-meta">
+            <div class="meta-pills-row">
+              <span class="badge-pill">🛡️ PostgREST Schema Audit</span>
+              <span class="badge-pill">🚨 Unauthenticated Read Detection</span>
+              <span class="badge-pill">📋 Missing Row Level Security (RLS)</span>
+            </div>
+            <span class="meta-hint-text">Tests anonymous HTTP endpoints for unauthenticated data leakage and checks repository SQL schemas for missing <code>ENABLE ROW LEVEL SECURITY</code>.</span>
+          </div>
+        </div>
+
+        <!-- Mode 3: Local Codebase & Bundles -->
+        <div class="scanner-panel-mode" id="panelModeUpload" style="display: none;">
           <div class="hero-dropzone" id="heroDropzone">
             <input type="file" id="heroFileInput" class="file-input-hidden" multiple accept=".js,.ts,.py,.sql,.php,.env,.json,.txt,.java,.go,.kt,.dart,.xml,.yml,.yaml">
             <input type="file" id="heroFolderInput" class="file-input-hidden" webkitdirectory directory multiple>
             <div class="hero-dropzone-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; max-width: 24px; max-height: 24px; flex-shrink: 0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
             <div class="hero-dropzone-copy">
               <strong>Drag & Drop your codebase files, app bundle, or <code>.env</code> here</strong>
@@ -136,27 +206,15 @@
               <button class="btn btn-secondary btn-sm" id="btnBrowseFolder" type="button">📁 Upload Folder / Bundle</button>
             </div>
           </div>
-
-          <!-- Upload Status & Quick Presets -->
           <div class="upload-quick-bar">
             <div class="upload-active-status" id="uploadActiveStatus">
               <span class="status-dot"></span>
-              <span id="uploadStatusText">Ready to scan codebase. Or test with sample snippets:</span>
-            </div>
-            <div class="upload-preset-shortcuts">
-              <button class="preset-pill-btn" id="heroBtnSampleSqli">💉 SQL Injection</button>
-              <button class="preset-pill-btn" id="heroBtnSampleSecrets">🔑 Leaked Secrets</button>
-              <button class="preset-pill-btn" id="heroBtnSampleCoppa">👶 COPPA Age Gate</button>
-              <button class="preset-pill-btn" id="heroBtnSampleFonts">🔤 Google Fonts</button>
-              <button class="preset-pill-btn" id="heroBtnSampleReplay">📹 Session Replay</button>
-              <button class="preset-pill-btn" id="heroBtnSampleEmail">✉️ Email Unsubscribe</button>
-              <button class="preset-pill-btn" id="heroBtnSampleFlutter">📱 Flutter App Bundle</button>
-              <button class="preset-pill-btn" id="heroBtnSampleSecure">🛡️ Secure Code</button>
+              <span id="uploadStatusText">Ready to scan local codebase files or bundle.</span>
             </div>
           </div>
         </div>
 
-        <!-- Mode 2: App Details & URL Quick Check bar -->
+        <!-- Mode 4: Web Endpoint Quick Scan -->
         <div class="scanner-panel-mode" id="panelModeUrl" style="display: none;">
           <div class="quick-scanner-bar">
             <div class="input-group flex-2">
@@ -183,6 +241,23 @@
             </div>
           </div>
         </div>
+
+        <!-- Live Ingestion & Telemetry Progress Container -->
+        <div class="scan-telemetry-panel" id="scanProgressContainer" style="display: none;">
+          <div class="telemetry-header">
+            <div class="telemetry-title">
+              <span class="status-dot pulse"></span>
+              <strong id="telemetryStatusTitle">Ingesting Repository Stream...</strong>
+            </div>
+            <span class="telemetry-percent" id="scanProgressPercent">0%</span>
+          </div>
+          <div class="telemetry-bar-track">
+            <div class="telemetry-bar-fill" id="scanProgressBar" style="width: 0%;"></div>
+          </div>
+          <div class="telemetry-footer">
+            <span id="scanProgressText">Connecting to GitHub REST API...</span>
+          </div>
+        </div>
       </section>
 
       <!-- Framework Scorecards Grid -->
@@ -196,15 +271,11 @@
         </div>
       </section>
 
-      <!-- View Navigation Tabs: Checklist vs Codescan vs Launch Readiness vs Gaps vs Remediation Plan -->
+      <!-- View Navigation Tabs: Codescan vs Launch Readiness vs Gaps vs Remediation vs Attestation -->
       <div class="tab-navigation">
-        <button class="nav-tab active" data-tab="checklist">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Audit Checklist (<span id="tabAnsweredCount">0</span>/<span id="tabTotalCount">0</span>)
-        </button>
-        <button class="nav-tab" data-tab="codescan">
+        <button class="nav-tab active" data-tab="codescan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
-          Code & Secret Scanner (<span id="tabCodeVulnCount" class="badge-accent">0</span>)
+          Security & Vulnerability Analysis (<span id="tabCodeVulnCount" class="badge-accent">0</span>)
         </button>
         <button class="nav-tab" data-tab="launch">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -218,14 +289,142 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           Remediation Roadmap
         </button>
+        <button class="nav-tab" data-tab="checklist">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Manual Attestation (<span id="tabAnsweredCount">0</span>/<span id="tabTotalCount">0</span>)
+        </button>
         <button class="nav-tab" data-tab="policies">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           Policy Generator
         </button>
       </div>
 
-      <!-- TAB 1: Audit Checklist View -->
-      <section id="view-checklist" class="tab-view active">
+      <!-- TAB 1: Security & Vulnerability Analysis (Primary Active View) -->
+      <section id="view-codescan" class="tab-view active">
+        <div class="codescan-header glass-panel">
+          <div class="codescan-copy">
+            <div class="live-pulse-badge" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: var(--red);">
+              <span class="pulse-dot" style="background-color: var(--red); box-shadow: 0 0 8px var(--red);"></span>
+              <span>Client-Side SAST, Secret Scanner & PostgREST/RLS Inspector</span>
+            </div>
+            <h3>Repository Security Posture & Vulnerability Findings</h3>
+            <p>Interactive tree browser and split diff remediations for detected SQL injections, leaked API keys, missing RLS policies, and regulatory privacy violations.</p>
+          </div>
+          <div class="codescan-header-actions">
+            <button id="btnToggleRawEditor" class="btn btn-secondary btn-sm" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Manual Code Editor</span>
+            </button>
+            <button id="btnSyncWithAudit" class="btn btn-secondary btn-sm" type="button" style="display: none;">
+              <span>🔄 Sync to Compliance Matrix</span>
+            </button>
+            <div class="scan-grade-badge grade-neutral" id="scanRiskGrade">
+              <span>GRADE</span>
+              <strong id="gradeLetter">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics Summary Row -->
+        <div class="scan-metrics-row glass-panel" style="margin-bottom: 20px;">
+          <div class="metric-chip">
+            <span class="m-val red" id="flawsCritical">0</span>
+            <span class="m-label">Critical</span>
+          </div>
+          <div class="metric-chip">
+            <span class="m-val amber" id="flawsHigh">0</span>
+            <span class="m-label">High</span>
+          </div>
+          <div class="metric-chip">
+            <span class="m-val blue" id="flawsSecrets">0</span>
+            <span class="m-label">Secrets Leaked</span>
+          </div>
+          <div class="metric-chip">
+            <span class="m-val purple" id="flawsSql">0</span>
+            <span class="m-label">Database / RLS</span>
+          </div>
+          <div class="metric-chip">
+            <span class="m-val cyan" id="filesScannedCount">0</span>
+            <span class="m-label">Files Scanned</span>
+          </div>
+          <div class="metric-chip flex-align-end" style="margin-left: auto;">
+            <span class="results-sub" id="scanTimestamp">Ready for scan</span>
+          </div>
+        </div>
+
+        <!-- Collapsible Manual Code Editor Drawer -->
+        <div class="raw-editor-drawer glass-panel" id="rawEditorDrawer" style="display: none; margin-bottom: 20px;">
+          <div class="editor-toolbar">
+            <span class="toolbar-label">Vulnerability Test Presets:</span>
+            <div class="preset-pill-group">
+              <button class="pill-btn" id="btnPresetSqli" type="button" title="Test SQL injection flaw">💉 SQL Injection</button>
+              <button class="pill-btn" id="btnPresetSecrets" type="button" title="Test hardcoded API key leaks">🔑 Leaked Secrets</button>
+              <button class="pill-btn" id="btnPresetEval" type="button" title="Test dangerous eval/RCE pattern">⚡ eval / RCE</button>
+              <button class="pill-btn" id="btnPresetCoppa" type="button" title="Test COPPA minor age gate flaw">👶 COPPA Age Gate</button>
+              <button class="pill-btn" id="btnPresetFonts" type="button" title="Test Google Fonts runtime fetching">🔤 Google Fonts Dynamic</button>
+              <button class="pill-btn" id="btnPresetReplay" type="button" title="Test session replay SDK leak">📹 Session Replay Leak</button>
+              <button class="pill-btn" id="btnPresetEmail" type="button" title="Test commercial email missing unsubscribe">✉️ Email Missing Unsub</button>
+              <button class="pill-btn" id="btnPresetFlutter" type="button" title="Test Flutter app bundle">📱 Flutter App Bundle</button>
+              <button class="pill-btn" id="btnPresetSecure" type="button" title="Test secure parameterized code">🛡️ Clean Secure Code</button>
+            </div>
+          </div>
+          <div class="file-dropzone" id="fileDropzone" style="margin-bottom: 12px;">
+            <input type="file" id="codeFileInput" class="file-input-hidden" accept=".js,.ts,.py,.sql,.php,.env,.json,.txt,.java,.go">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Click or Drop source code / <code>.env</code> file here to scan</span>
+          </div>
+          <div class="textarea-wrapper">
+            <textarea id="codeEditorInput" class="code-textarea" placeholder="Paste source code or .env here to test individual files..."></textarea>
+          </div>
+          <div class="editor-bottom-bar">
+            <div class="editor-meta">
+              <span id="codeLineCount">0 lines</span> &bull; <span id="codeCharCount">0 characters</span>
+            </div>
+            <div class="editor-actions">
+              <button id="btnClearCode" class="btn btn-ghost btn-sm" type="button">Clear Code</button>
+              <button id="btnRunCodeScan" class="btn btn-primary btn-sm" type="button">⚡ Scan Snippet</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enterprise Split Findings Browser -->
+        <div class="codescan-browser-grid">
+          <!-- Left: File Tree & Findings Navigation Sidebar -->
+          <aside class="file-tree-sidebar glass-panel">
+            <div class="file-tree-header">
+              <div class="file-tree-search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="findingsFilterInput" placeholder="Filter files or findings...">
+              </div>
+            </div>
+            <div class="file-tree-list" id="findingsFileTree">
+              <div class="empty-tree-state">
+                <span>No repository scanned yet. Use the command center above to scan a GitHub repo or codebase.</span>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Right: Active Finding Inspector & Split Code Diff Viewer -->
+          <main class="active-inspector-panel glass-panel" id="activeFindingInspector">
+            <div class="empty-findings-state" id="emptyFindingsPlaceholder">
+              <div class="empty-state-shield-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="48" height="48"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <h4>Connect Repository to Inspect Vulnerabilities</h4>
+              <p>Authorize a GitHub repository scan, inspect Supabase PostgREST endpoints, or upload a local project folder above to generate deep static analysis with split code diff remediations.</p>
+            </div>
+            <div class="split-diff-container" id="splitDiffContainer" style="display: none;">
+              <!-- Dynamically populated by JS -->
+            </div>
+          </main>
+        </div>
+
+        <!-- Hidden legacy findings list container for compatibility -->
+        <div class="findings-scroll-container" id="findingsContainer" style="display: none;"></div>
+      </section>
+
+      <!-- TAB 2: Audit Checklist View (Manual Attestation) -->
+      <section id="view-checklist" class="tab-view">
         <!-- Filter and Search Toolbar -->
         <div class="checklist-toolbar glass-panel">
           <div class="search-box">
@@ -265,115 +464,6 @@
         <!-- Questions Matrix Container -->
         <div class="controls-list" id="controlsContainer">
           <!-- Dynamically populated -->
-        </div>
-      </section>
-
-      <!-- TAB: Code & Secret Scanner View -->
-      <section id="view-codescan" class="tab-view">
-        <div class="codescan-header glass-panel">
-          <div class="codescan-copy">
-            <div class="live-pulse-badge" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: var(--red);">
-              <span class="pulse-dot" style="background-color: var(--red); box-shadow: 0 0 8px var(--red);"></span>
-              <span>Client-Side SAST & Secret Scanner (OWASP Top 10 + CWE)</span>
-            </div>
-            <h3>Static Code Security & Secret Vulnerability Inspector</h3>
-            <p>Paste code, configurations, or <code>.env</code> files to instantly detect <strong>SQL Injections</strong> (database hijacking), <strong>leaked API keys/credentials</strong>, <strong>remote code execution (eval)</strong>, and <strong>insecure cryptography</strong>. Runs 100% in your browser without uploading code anywhere.</p>
-          </div>
-          <div class="codescan-header-actions">
-            <span class="scan-privacy-badge">🔒 100% Client-Side &bull; Zero Cloud Upload</span>
-          </div>
-        </div>
-
-        <div class="codescan-layout">
-          <!-- Left: Code Editor & Presets -->
-          <div class="codescan-editor-box glass-panel">
-            <div class="editor-toolbar">
-              <span class="toolbar-label">Load Vulnerability Presets:</span>
-              <div class="preset-pill-group">
-                <button class="pill-btn" id="btnPresetSqli" title="Test SQL injection flaw">💉 SQL Injection</button>
-                <button class="pill-btn" id="btnPresetSecrets" title="Test hardcoded API key leaks">🔑 Leaked Secrets</button>
-                <button class="pill-btn" id="btnPresetEval" title="Test dangerous eval/RCE pattern">⚡ eval / RCE</button>
-                <button class="pill-btn" id="btnPresetCoppa" title="Test COPPA minor age gate flaw">👶 COPPA Age Gate</button>
-                <button class="pill-btn" id="btnPresetFonts" title="Test Google Fonts runtime fetching">🔤 Google Fonts Dynamic</button>
-                <button class="pill-btn" id="btnPresetReplay" title="Test session replay SDK leak">📹 Session Replay Leak</button>
-                <button class="pill-btn" id="btnPresetEmail" title="Test commercial email missing unsubscribe">✉️ Email Missing Unsub</button>
-                <button class="pill-btn" id="btnPresetFlutter" title="Test Flutter app bundle">📱 Flutter App Bundle</button>
-                <button class="pill-btn" id="btnPresetSecure" title="Test secure parameterized code">🛡️ Clean Secure Code</button>
-              </div>
-            </div>
-
-            <div class="file-dropzone" id="fileDropzone">
-              <input type="file" id="codeFileInput" class="file-input-hidden" accept=".js,.ts,.py,.sql,.php,.env,.json,.txt,.java,.go">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span>Click or Drop source code / <code>.env</code> file here to scan</span>
-            </div>
-
-            <div class="textarea-wrapper">
-              <textarea id="codeEditorInput" class="code-textarea" placeholder="Paste your JavaScript, TypeScript, Python, SQL, PHP, or .env code here to scan for security flaws..."></textarea>
-            </div>
-
-            <div class="editor-bottom-bar">
-              <div class="editor-meta">
-                <span id="codeLineCount">0 lines</span> &bull; <span id="codeCharCount">0 characters</span>
-              </div>
-              <div class="editor-actions">
-                <button id="btnClearCode" class="btn btn-ghost btn-sm">Clear Code</button>
-                <button id="btnRunCodeScan" class="btn btn-primary">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                  <span>⚡ Scan Code for Flaws</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Security Report & Findings -->
-          <div class="codescan-results-box glass-panel">
-            <div class="results-header">
-              <div class="results-title-group">
-                <h4>Vulnerability Analysis Report</h4>
-                <span class="results-sub" id="scanTimestamp">Ready for scan</span>
-              </div>
-              <div class="scan-grade-badge grade-neutral" id="scanRiskGrade">
-                <span>GRADE</span>
-                <strong id="gradeLetter">—</strong>
-              </div>
-            </div>
-
-            <!-- Mini Summary Metric Row -->
-            <div class="scan-metrics-row">
-              <div class="metric-chip">
-                <span class="m-val red" id="flawsCritical">0</span>
-                <span class="m-label">Critical</span>
-              </div>
-              <div class="metric-chip">
-                <span class="m-val amber" id="flawsHigh">0</span>
-                <span class="m-label">High</span>
-              </div>
-              <div class="metric-chip">
-                <span class="m-val blue" id="flawsSecrets">0</span>
-                <span class="m-label">Secrets Leaked</span>
-              </div>
-              <div class="metric-chip">
-                <span class="m-val purple" id="flawsSql">0</span>
-                <span class="m-label">Database Attacks</span>
-              </div>
-            </div>
-
-            <div class="sync-actions-bar" id="syncActionBar" style="display: none;">
-              <span class="sync-text">Found issues affecting compliance audit!</span>
-              <button id="btnSyncWithAudit" class="btn btn-sm btn-secondary">
-                🔄 Sync Findings to Compliance Matrix
-              </button>
-            </div>
-
-            <!-- Findings List -->
-            <div class="findings-scroll-container" id="findingsContainer">
-              <div class="empty-findings-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <p>Paste code or select a preset on the left, then click <strong>"Scan Code for Flaws"</strong> to inspect for security vulnerabilities.</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -525,58 +615,7 @@
       </div>
     </div>
 
-    <!-- User Guide Interactive Modal -->
-    <div class="modal-backdrop" id="guideModal">
-      <div class="modal-dialog modal-lg glass-panel">
-        <div class="modal-header">
-          <div>
-            <span class="modal-category">Interactive Tutorial</span>
-            <h3 class="modal-title">📖 ComplianceShield User Guide & Walkthrough</h3>
-          </div>
-          <button class="modal-close" id="btnGuideModalClose">&times;</button>
-        </div>
-        <div class="modal-body" style="display: flex; flex-direction: column; gap: 18px;">
-          <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); padding: 14px; border-radius: var(--radius-sm); font-size: 0.9rem;">
-            <strong style="color: var(--cyan);">💡 Zero Setup Required:</strong> This application runs 100% in your browser. All assessment progress and code scan results are stored safely on your device without transmitting data over the internet.
-          </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;">
-            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm);">
-              <h4 style="color: var(--cyan); margin-bottom: 6px;">1. Set Scope & Quick Audit</h4>
-              <p style="font-size: 0.85rem; color: var(--text-secondary);">Enter your app name and domain. Click <strong>"Quick Audit"</strong> to auto-evaluate baseline TLS, Git branch protection, and backup configurations.</p>
-            </div>
-
-            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm);">
-              <h4 style="color: var(--purple); margin-bottom: 6px;">2. Test Industry Presets</h4>
-              <p style="font-size: 0.85rem; color: var(--text-secondary);">Use the <strong>App Template</strong> dropdown in the top bar to load realistic profiles: SaaS (SOC 2), Telehealth (HIPAA), or FinTech (PCI-DSS).</p>
-            </div>
-
-            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm);">
-              <h4 style="color: var(--red); margin-bottom: 6px;">3. Code & Secret Scanner</h4>
-              <p style="font-size: 0.85rem; color: var(--text-secondary);">Switch to the <strong>"Code & Secret Scanner"</strong> tab. Test presets like <em>SQL Injection</em> or <em>Hardcoded Secrets</em> to see live line-by-line flaw detection and fixes.</p>
-            </div>
-
-            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm);">
-              <h4 style="color: var(--green); margin-bottom: 6px;">4. Audit Checklist & Proof</h4>
-              <p style="font-size: 0.85rem; color: var(--text-secondary);">Mark controls as <strong>✓ Compliant</strong> or <strong>✕ Gap</strong>. Click <em>"View Audit Evidence Proof"</em> to see exact screenshots & logs required by certified auditors.</p>
-            </div>
-
-            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm);">
-              <h4 style="color: var(--amber); margin-bottom: 6px;">5. Remediation Roadmap</h4>
-              <p style="font-size: 0.85rem; color: var(--text-secondary);">Check the <strong>Remediation Roadmap</strong> tab for a 3-phase execution checklist (Weeks 1 to 6) to eliminate critical gaps prior to audit observation windows.</p>
-            </div>
-
-            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-sm);">
-              <h4 style="color: #60a5fa; margin-bottom: 6px;">6. Policy Gen & PDF Export</h4>
-              <p style="font-size: 0.85rem; color: var(--text-secondary);">Copy markdown policies (Incident Response, BCDR, HIPAA BAA). Click <strong>"Export Report"</strong> to print a formal PDF summary for leadership.</p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" id="btnGuideModalClose2" style="width: 100%;">Got It, Let's Start!</button>
-        </div>
-      </div>
-    </div>
     <div class="toast-container" id="toastContainer"></div>
 
     <footer class="app-footer">
