@@ -6,9 +6,16 @@ Welcome to **ComplianceShield**, an all-in-one compliance readiness auditor and 
 
 ## ⚡ Quick Launch
 
-1. **Double-click** or run:
-   ```powershell
-   start D:\compliance-checker\index.html
+1. **Open directly in your default web browser**:
+   ```bash
+   # Windows (PowerShell/CMD)
+   start index.html
+
+   # macOS
+   open index.html
+
+   # Linux
+   xdg-open index.html
    ```
 2. The application opens instantly in your default web browser (Chrome, Edge, Firefox, Safari).
 3. **No installation, no npm, and no server required!** Everything runs 100% locally in your browser with zero latency and full privacy.
