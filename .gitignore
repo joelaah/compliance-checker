@@ -14,3 +14,16 @@ __pycache__/
 dashboard/.dart_tool/
 dashboard/build/
 dashboard/.flutter-plugins*
+
+# Security, Environment & Secrets (MANDATORY)
+.env
+*.env
+*.env.*
+!.env.example
+!*.env.example
+*.pem
+*.key
+*.secret
+*.credentials
+netforemost_raw.html
+

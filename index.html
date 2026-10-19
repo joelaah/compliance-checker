@@ -9,8 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=3.0">
+  <noscript><style>.initial-app-skeleton { display: none !important; }</style></noscript>
 </head>
 <body>
+  <div id="complianceSkeleton" class="initial-app-skeleton" aria-hidden="true">
+    <div class="skeleton-shimmer-bar"></div>
+  </div>
+
   <div class="app-layout">
     <!-- Top Navigation Header -->
     <header class="top-nav" id="topNav">
@@ -29,6 +34,11 @@
 
       <!-- Quick Preset & Meta Controls -->
       <div class="nav-actions">
+        <div class="engine-status-pill" id="engineStatusPill" title="Serverless / In-Browser AST Runtime Engine">
+          <span class="engine-pulse-dot"></span>
+          <span class="engine-status-text">Client Engine: <strong class="engine-status-state">Warm &amp; Ready</strong> (0ms Egress)</span>
+        </div>
+
         <div class="preset-dropdown-wrapper">
           <label for="samplePreset" class="preset-label">App Template:</label>
           <select id="samplePreset" class="custom-select">
@@ -39,7 +49,6 @@
             <option value="consumer">🌍 Global Consumer Web App (GDPR Focus)</option>
           </select>
         </div>
-
 
         <button id="btnExportReport" class="btn btn-secondary btn-icon" title="Export Audit Report">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -97,6 +106,18 @@
           </div>
         </div>
 
+        <!-- Hero 1-Click Sandbox Demo Callout -->
+        <div class="hero-demo-callout">
+          <div class="hero-demo-info">
+            <span class="hero-demo-badge">🚀 Instant Interactive Sandbox</span>
+            <span class="hero-demo-desc">Want an instant preview? Load pre-populated multi-service codebase with real vulnerabilities, live AST parsing, and 195-nation audit matrix without entering tokens or repos.</span>
+          </div>
+          <button type="button" class="btn-demo-action" id="btnLaunch1ClickDemo" title="Load Pre-populated Multi-File Demo Sandbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>⚡ 1-Click Interactive Demo</span>
+          </button>
+        </div>
+
         <!-- Scanner Mode Tabs -->
         <div class="scanner-mode-tabs">
           <button class="scanner-mode-btn active" id="btnModeGithub" data-mode="github" type="button">
@@ -150,7 +171,12 @@
               <span class="badge-pill">🌍 195 Country Readiness Check</span>
             </div>
             <div class="meta-shortcuts-row">
-              <button type="button" class="preset-link-btn" id="btnSampleRepoJoe">⚡ Current repo: joelaah/compliance-checker</button>
+              <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">⚡ Quick Demo Presets:</span>
+              <button type="button" class="preset-link-btn" id="btnSampleRepoJoe">Current repo: joelaah/compliance-checker</button>
+              <button type="button" class="preset-link-btn" id="btnQuickDemoSecrets">🔑 Leaked Secrets</button>
+              <button type="button" class="preset-link-btn" id="btnQuickDemoSqli">💉 SQL Injection</button>
+              <button type="button" class="preset-link-btn" id="btnQuickDemoCoppa">👶 COPPA Flaw</button>
+              <button type="button" class="preset-link-btn" id="btnQuickDemoFonts">🔤 Google Fonts IP Leak</button>
             </div>
           </div>
         </div>

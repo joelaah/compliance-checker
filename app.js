@@ -2197,6 +2197,25 @@ class ComplianceApp {
     this.launchViewMode = 'countries'; // 'countries' | 'jurisdictions'
     this.btnLaunchModeCountries = document.getElementById('btnLaunchModeCountries');
     this.btnLaunchModeJurisdictions = document.getElementById('btnLaunchModeJurisdictions');
+
+    // Dismiss initial loading skeleton smoothly
+    if (typeof setTimeout !== 'undefined') {
+      setTimeout(() => {
+        const skel = document.getElementById('complianceSkeleton');
+        if (skel) {
+          skel.classList.add('loaded');
+          setTimeout(() => skel.remove(), 400);
+        }
+      }, 200);
+    }
+
+    // 1-Click Sandbox Demo & Quick Preset Buttons
+    this.btnLaunch1ClickDemo = document.getElementById('btnLaunch1ClickDemo');
+    this.samplePreset = document.getElementById('samplePreset');
+    this.btnQuickDemoSecrets = document.getElementById('btnQuickDemoSecrets');
+    this.btnQuickDemoSqli = document.getElementById('btnQuickDemoSqli');
+    this.btnQuickDemoCoppa = document.getElementById('btnQuickDemoCoppa');
+    this.btnQuickDemoFonts = document.getElementById('btnQuickDemoFonts');
   }
 
   bindEvents() {
@@ -2242,6 +2261,30 @@ class ComplianceApp {
     this.btnSampleRepoJoe?.addEventListener('click', () => {
       if (this.ghRepoInput) this.ghRepoInput.value = 'joelaah/compliance-checker';
       this.scanGithubRepository();
+    });
+
+    // 1-Click Interactive Demo Action
+    this.btnLaunch1ClickDemo?.addEventListener('click', () => {
+      this.loadInteractiveDemoSandbox();
+    });
+
+    // Template Presets Dropdown
+    this.samplePreset?.addEventListener('change', (e) => {
+      this.applyAppTemplatePreset(e.target.value);
+    });
+
+    // Quick Preset Shortcuts
+    this.btnQuickDemoSecrets?.addEventListener('click', () => {
+      this.openEditorWithPreset('secrets');
+    });
+    this.btnQuickDemoSqli?.addEventListener('click', () => {
+      this.openEditorWithPreset('sqli');
+    });
+    this.btnQuickDemoCoppa?.addEventListener('click', () => {
+      this.openEditorWithPreset('coppa');
+    });
+    this.btnQuickDemoFonts?.addEventListener('click', () => {
+      this.openEditorWithPreset('fonts');
     });
 
     // Supabase Ingestion Action
@@ -2635,6 +2678,185 @@ class ComplianceApp {
       this.scanSingleSourceFile(presetFileName, code);
       this.showToast(`Loaded "${presetKey}" code security test preset`);
     }
+  }
+
+  openEditorWithPreset(presetKey) {
+    if (this.rawEditorDrawer) {
+      this.rawEditorDrawer.style.display = 'block';
+    }
+    const tabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+    if (tabBtn) tabBtn.click();
+    this.loadCodePreset(presetKey);
+    const editorSec = document.getElementById('rawEditorDrawer');
+    if (editorSec) editorSec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  loadInteractiveDemoSandbox() {
+    this.updateTelemetry(15, 'Waking In-Browser AST Engine...', 'Zero cloud egress — loading multi-service demo codebase...');
+    
+    // Multi-service demo repository files
+    const demoFiles = [
+      {
+        path: 'services/auth_controller.js',
+        content: `// Authentication & Session Controller (Enterprise API)\nconst express = require('express');\nconst db = require('../database');\nconst app = express();\n\nconst JWT_SECRET = "jwt_super_secret_signing_key_9918237";\nconst OPENAI_API_KEY = "sk-TEST-DEMO-MOCK-API-KEY-DO-NOT-USE-123456789";\n\napp.post('/api/auth/login', async (req, res) => {\n  const { username, password } = req.body;\n  // CRITICAL FLAW: Direct concatenation allows SQL injection auth bypass!\n  const sql = "SELECT id, email FROM accounts WHERE username = '" + username + "' AND pass = '" + password + "'";\n  const results = await db.query(sql);\n  res.json(results);\n});`
+      },
+      {
+        path: 'config/cloud_credentials.env',
+        content: `# Cloud Infrastructure Credentials\nAWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\nAWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\nDATABASE_URL=postgres://root:SuperSecretPassword2024!@production-cluster.internal:5432/core_db\nSTRIPE_SECRET_KEY=mock_sandbox_test_token_not_a_real_secret`
+      },
+      {
+        path: 'lib/registration_screen.dart',
+        content: `// User Onboarding & Account Registration\nimport 'package:flutter/material.dart';\n\nclass RegisterScreen extends StatelessWidget {\n  // CRITICAL FLAW: Account created without Age Gate or Parental Consent verification!\n  void registerUser(String username, String email, String password) {\n    UserDatabase.insertUser(username: username, email: email, pass: password);\n  }\n}`
+      },
+      {
+        path: 'lib/main.dart',
+        content: `// Flutter Client Entry Point\nimport 'package:flutter/material.dart';\nimport 'package:google_fonts/google_fonts.dart';\n\nvoid main() {\n  // CRITICAL FLAW: Missing GoogleFonts.config.allowRuntimeFetching = false;\n  // Dynamically fetches fonts from fonts.googleapis.com, leaking EU user IP addresses\n  runApp(const MyApp());\n}`
+      },
+      {
+        path: 'public/telemetry_client.js',
+        content: `// Frontend Telemetry & Session Monitoring\nimport LogRocket from 'logrocket';\n\n// CRITICAL FLAW: Session replay SDK initialized immediately without affirmative user consent\nLogRocket.init('enterprise-org/prod-app');\n\nwindow['_fs_namespace'] = 'FS';\nFS.identify('user-demo-99', { email: 'demo@enterprise.internal' });`
+      },
+      {
+        path: 'services/email_marketing.js',
+        content: `// Commercial Dispatch Service\nconst nodemailer = require('nodemailer');\nconst transporter = nodemailer.createTransporter({ /* SMTP */ });\n\nasync function dispatchCampaign(userEmail) {\n  // CRITICAL FLAW: Commercial message missing required unsubscribe link and physical mailing address\n  await transporter.sendMail({\n    from: 'marketing@enterprise.internal',\n    to: userEmail,\n    subject: 'Exclusive Enterprise Tier Discount',\n    html: '<div>Upgrade today for 40% discount! Click <a href=\"https://app.io/checkout\">here</a></div>'\n  });\n}`
+      },
+      {
+        path: 'services/secure_vault.js',
+        content: `// ✅ Clean Reference Microservice: Parameterized queries & env secrets\nrequire('dotenv').config();\nconst db = require('../db');\n\napp.post('/api/vault/verify', async (req, res) => {\n  const { token } = req.body;\n  const query = 'SELECT token_id, verified FROM auth_tokens WHERE token_hash = $1';\n  const result = await db.query(query, [token]);\n  res.json({ valid: result.rowCount > 0 });\n});`
+      }
+    ];
+
+    setTimeout(() => {
+      this.updateTelemetry(45, 'AST Tokenization & Entropy Scanning...', 'Analyzing 7 services across AST nodes & Shannon heuristics...');
+      
+      setTimeout(() => {
+        this.scannedFilesMap.clear();
+        const allFindings = [];
+
+        demoFiles.forEach(item => {
+          const lines = item.content.split('\n');
+          const fileFindings = [];
+
+          lines.forEach((lineText, idx) => {
+            const lineNum = idx + 1;
+            const trimmed = lineText.trim();
+            if (trimmed.startsWith('//') && !trimmed.includes('AKIA') && !trimmed.includes('sk-') && !trimmed.includes('postgres://')) {
+              return;
+            }
+
+            CODE_VULN_RULES.forEach(rule => {
+              if (rule.test(lineText, item.content, idx, lines)) {
+                const already = fileFindings.some(f => f.line === lineNum && f.ruleId === rule.id);
+                if (!already) {
+                  const finding = {
+                    file: item.path,
+                    line: lineNum,
+                    ruleId: rule.id,
+                    category: rule.category,
+                    title: rule.title,
+                    severity: rule.severity,
+                    cwe: rule.cwe,
+                    owasp: rule.owasp,
+                    complianceControl: rule.complianceControl,
+                    exploit: rule.exploit,
+                    snippet: lineText.trim(),
+                    badCode: rule.badCode,
+                    goodCode: rule.goodCode,
+                    contextLines: lines.slice(Math.max(0, idx - 2), Math.min(lines.length, idx + 3)),
+                    contextStartLine: Math.max(1, lineNum - 2)
+                  };
+                  fileFindings.push(finding);
+                  allFindings.push(finding);
+                }
+              }
+            });
+          });
+
+          this.scannedFilesMap.set(item.path, {
+            path: item.path,
+            content: item.content,
+            lines: lines,
+            findings: fileFindings
+          });
+        });
+
+        this.updateTelemetry(100, 'Sandbox Scan Complete', `Scanned 7 files in Sandbox Demo. Identified ${allFindings.length} vulnerability findings.`);
+        this.latestCodeFindings = allFindings;
+
+        if (this.filesScannedCount) {
+          this.filesScannedCount.innerText = demoFiles.length;
+        }
+
+        this.updateFindingMetrics(allFindings);
+        this.syncFindingsToCompliance(false);
+        this.renderFileTree();
+        this.renderGlobalLaunchReadiness();
+
+        if (allFindings.length > 0) {
+          this.showFindingDiff(allFindings[0]);
+        }
+
+        const tabBtn = document.querySelector('.nav-tab[data-tab="codescan"]');
+        if (tabBtn) tabBtn.click();
+
+        this.showToast(`🚀 Interactive Sandbox Ready! 7 files analyzed, ${allFindings.length} findings mapped across SOC 2, HIPAA, GDPR & 195 nations.`);
+      }, 300);
+    }, 150);
+  }
+
+  applyAppTemplatePreset(templateKey) {
+    if (templateKey === 'custom') return;
+    
+    // Clear existing answers
+    this.answers = {};
+    
+    if (templateKey === 'saas') {
+      // B2B Enterprise SaaS: high SOC 2 & ISO 27001 readiness
+      CONTROLS.forEach(c => {
+        if (c.frameworks.includes('soc2') || c.frameworks.includes('iso27001')) {
+          this.answers[c.id] = 'compliant';
+        } else if (c.id === 'PRIV-06' || c.id === 'SEC-10') {
+          this.answers[c.id] = 'gap';
+        }
+      });
+      this.showToast('Applied "B2B SaaS Enterprise Platform" template (SOC 2 & ISO 27001 focus)');
+    } else if (templateKey === 'health') {
+      // Telehealth: HIPAA & GDPR focus
+      CONTROLS.forEach(c => {
+        if (c.frameworks.includes('hipaa')) {
+          this.answers[c.id] = 'compliant';
+        } else if (c.id === 'CC-6.1' || c.id === 'A.8.24') {
+          this.answers[c.id] = 'compliant';
+        } else if (c.id === 'PRIV-08') {
+          this.answers[c.id] = 'gap';
+        }
+      });
+      this.showToast('Applied "Telehealth & Patient Portal" template (HIPAA Safeguards focus)');
+    } else if (templateKey === 'fintech') {
+      // FinTech: PCI-DSS & SOC 2
+      CONTROLS.forEach(c => {
+        if (c.frameworks.includes('pci') || c.frameworks.includes('soc2')) {
+          this.answers[c.id] = 'compliant';
+        } else if (c.id === 'PRIV-07') {
+          this.answers[c.id] = 'gap';
+        }
+      });
+      this.showToast('Applied "FinTech & Payments API" template (PCI-DSS & SOC 2 focus)');
+    } else if (templateKey === 'consumer') {
+      // Consumer: GDPR & COPPA
+      CONTROLS.forEach(c => {
+        if (c.frameworks.includes('gdpr')) {
+          this.answers[c.id] = 'compliant';
+        }
+        if (c.id === 'PRIV-06' || c.id === 'PRIV-07' || c.id === 'COMM-01') {
+          this.answers[c.id] = 'gap';
+        }
+      });
+      this.showToast('Applied "Global Consumer Web App" template (GDPR & COPPA focus)');
+    }
+
+    this.saveState();
+    this.updateAllViews();
   }
 
   scanSingleSourceFile(fileName, rawCode) {
@@ -4758,6 +4980,12 @@ class ComplianceApp {
 }
 
 // Start application upon DOM load
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new ComplianceApp();
-});
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.app = new ComplianceApp();
+    });
+  } else if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    window.app = new ComplianceApp();
+  }
+}
