@@ -1,8 +1,8 @@
 {
-  "audit_id": "audit-20261016142100-3d82df",
-  "timestamp": "2026-10-16T14:21:00.753897+00:00",
+  "audit_id": "audit-20261019093834-5e213c",
+  "timestamp": "2026-10-19T09:38:34.093946+00:00",
   "repo_name": "joelaah/compliance-checker",
-  "commit_sha": "056a29cd2f544b8d385116d5b47dd39c0e78e13d",
+  "commit_sha": "1db429b620106c46efd9024d41d0ee4b4ac3e50b",
   "branch": "refs/heads/main",
   "scan_summary": "Cortex-Compliance scan identified 3 potential issue(s). 3 confirmed violation(s), 0 mitigated externally, 0 false positive(s). Compliance Health Score: 76/100.",
   "health_score": 76,
@@ -21,7 +21,7 @@
   "findings": [
     {
       "stage1": {
-        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-8-24a2bd",
+        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-8-2b6816",
         "file_path": "/home/runner/work/compliance-checker/compliance-checker/index.html",
         "line": 8,
         "rule_id": "SEC-PRIV-GOOGLE-FONTS",
@@ -37,7 +37,7 @@
         "good_code": "GoogleFonts.config.allowRuntimeFetching = false;\n// Bundle font assets in pubspec.yaml"
       },
       "verdict": {
-        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-8-24a2bd",
+        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-8-2b6816",
         "status": "CONFIRMED_VIOLATION",
         "confidence": 0.98,
         "reason": "Confirmed vulnerability violating PRIV-07. Exploit: Dynamic font fetching transmits IP addresses to third-party US servers without consent (LG M\u00fcnchen Az. 3 O 17493/20).",
@@ -56,13 +56,13 @@
           "is_graded_relevant": true
         },
         {
-          "policy_id": "OWASP_TOP_10",
-          "policy_title": "owasp_top_10.md",
-          "section_or_article": "A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)",
-          "text": "### A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)\n- **Violation Patterns**: Missing business logic controls, unverified age checks, non-consensual session telemetry (`SEC-PRIV-COPPA-AGEGATE`, `SEC-PRIV-SESSION-REPLAY`).\n- **Remediation Standard**:\n  - Threat modeling integrated into CI/CD.\n  - Strict input validation schemas (Pydantic, Zod) on all ingress boundaries.",
-          "legal_risk": "Non-compliance with A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)",
+          "policy_id": "GDPR_DATA_PRIVACY",
+          "policy_title": "gdpr_data_privacy.md",
+          "section_or_article": "Regulatory Compliance Policy: GDPR & Global Data Privacy",
+          "text": "# Regulatory Compliance Policy: GDPR & Global Data Privacy\n\n**Identifier**: `POL-GDPR-PRIVACY-V2`  \n**Standard**: General Data Protection Regulation (EU) 2016/679, UK GDPR, California CCPA/CPRA, US COPPA (15 U.S.C. \u00a7\u00a7 6501-6506), India DPDP Act 2023  \n**Classification**: Mandatory Legal Baseline  \n**Enforcement Authority**: European Data Protection Board (EDPB), FTC, California Privacy Protection Agency (CPPA)\n\n---",
+          "legal_risk": "Non-compliance with Regulatory Compliance Policy: GDPR & Global Data Privacy",
           "penalty_framework": "Regulatory sanctions",
-          "relevance_score": 0.25,
+          "relevance_score": 0.257,
           "is_graded_relevant": true
         }
       ],
@@ -79,7 +79,7 @@
     },
     {
       "stage1": {
-        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-9-bf84ba",
+        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-9-689f09",
         "file_path": "/home/runner/work/compliance-checker/compliance-checker/index.html",
         "line": 9,
         "rule_id": "SEC-PRIV-GOOGLE-FONTS",
@@ -95,7 +95,7 @@
         "good_code": "GoogleFonts.config.allowRuntimeFetching = false;\n// Bundle font assets in pubspec.yaml"
       },
       "verdict": {
-        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-9-bf84ba",
+        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-9-689f09",
         "status": "CONFIRMED_VIOLATION",
         "confidence": 0.98,
         "reason": "Confirmed vulnerability violating PRIV-07. Exploit: Dynamic font fetching transmits IP addresses to third-party US servers without consent (LG M\u00fcnchen Az. 3 O 17493/20).",
@@ -114,13 +114,13 @@
           "is_graded_relevant": true
         },
         {
-          "policy_id": "OWASP_TOP_10",
-          "policy_title": "owasp_top_10.md",
-          "section_or_article": "A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)",
-          "text": "### A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)\n- **Violation Patterns**: Missing business logic controls, unverified age checks, non-consensual session telemetry (`SEC-PRIV-COPPA-AGEGATE`, `SEC-PRIV-SESSION-REPLAY`).\n- **Remediation Standard**:\n  - Threat modeling integrated into CI/CD.\n  - Strict input validation schemas (Pydantic, Zod) on all ingress boundaries.",
-          "legal_risk": "Non-compliance with A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)",
+          "policy_id": "GDPR_DATA_PRIVACY",
+          "policy_title": "gdpr_data_privacy.md",
+          "section_or_article": "Regulatory Compliance Policy: GDPR & Global Data Privacy",
+          "text": "# Regulatory Compliance Policy: GDPR & Global Data Privacy\n\n**Identifier**: `POL-GDPR-PRIVACY-V2`  \n**Standard**: General Data Protection Regulation (EU) 2016/679, UK GDPR, California CCPA/CPRA, US COPPA (15 U.S.C. \u00a7\u00a7 6501-6506), India DPDP Act 2023  \n**Classification**: Mandatory Legal Baseline  \n**Enforcement Authority**: European Data Protection Board (EDPB), FTC, California Privacy Protection Agency (CPPA)\n\n---",
+          "legal_risk": "Non-compliance with Regulatory Compliance Policy: GDPR & Global Data Privacy",
           "penalty_framework": "Regulatory sanctions",
-          "relevance_score": 0.25,
+          "relevance_score": 0.257,
           "is_graded_relevant": true
         }
       ],
@@ -137,7 +137,7 @@
     },
     {
       "stage1": {
-        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-10-fa6c2f",
+        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-10-67befe",
         "file_path": "/home/runner/work/compliance-checker/compliance-checker/index.html",
         "line": 10,
         "rule_id": "SEC-PRIV-GOOGLE-FONTS",
@@ -153,7 +153,7 @@
         "good_code": "GoogleFonts.config.allowRuntimeFetching = false;\n// Bundle font assets in pubspec.yaml"
       },
       "verdict": {
-        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-10-fa6c2f",
+        "finding_id": "SEC-PRIV-GOOGLE-FONTS-index.html-10-67befe",
         "status": "CONFIRMED_VIOLATION",
         "confidence": 0.98,
         "reason": "Confirmed vulnerability violating PRIV-07. Exploit: Dynamic font fetching transmits IP addresses to third-party US servers without consent (LG M\u00fcnchen Az. 3 O 17493/20).",
@@ -172,13 +172,13 @@
           "is_graded_relevant": true
         },
         {
-          "policy_id": "OWASP_TOP_10",
-          "policy_title": "owasp_top_10.md",
-          "section_or_article": "A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)",
-          "text": "### A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)\n- **Violation Patterns**: Missing business logic controls, unverified age checks, non-consensual session telemetry (`SEC-PRIV-COPPA-AGEGATE`, `SEC-PRIV-SESSION-REPLAY`).\n- **Remediation Standard**:\n  - Threat modeling integrated into CI/CD.\n  - Strict input validation schemas (Pydantic, Zod) on all ingress boundaries.",
-          "legal_risk": "Non-compliance with A04:2021 - Insecure Design (CWE-209, CWE-256, CWE-501)",
+          "policy_id": "GDPR_DATA_PRIVACY",
+          "policy_title": "gdpr_data_privacy.md",
+          "section_or_article": "Regulatory Compliance Policy: GDPR & Global Data Privacy",
+          "text": "# Regulatory Compliance Policy: GDPR & Global Data Privacy\n\n**Identifier**: `POL-GDPR-PRIVACY-V2`  \n**Standard**: General Data Protection Regulation (EU) 2016/679, UK GDPR, California CCPA/CPRA, US COPPA (15 U.S.C. \u00a7\u00a7 6501-6506), India DPDP Act 2023  \n**Classification**: Mandatory Legal Baseline  \n**Enforcement Authority**: European Data Protection Board (EDPB), FTC, California Privacy Protection Agency (CPPA)\n\n---",
+          "legal_risk": "Non-compliance with Regulatory Compliance Policy: GDPR & Global Data Privacy",
           "penalty_framework": "Regulatory sanctions",
-          "relevance_score": 0.25,
+          "relevance_score": 0.257,
           "is_graded_relevant": true
         }
       ],
